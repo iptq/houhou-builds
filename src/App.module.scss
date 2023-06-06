@@ -1,0 +1,11 @@
+.header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+
+  list-style-type: none;
+
+  li {
+    padding-left: 0;
+  }
+}
