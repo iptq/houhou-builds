@@ -1,9 +1,11 @@
 $navLinkAccentColor: #09c;
 $navLinkColor: hsl(203, 91%, 91%);
 
-main.main {
-  display: flex;
+.main {
+  min-height: 0;
+  display: inline-flex;
   flex-direction: column;
+  height: 100%;
 }
 
 .header {
@@ -17,6 +19,13 @@ main.main {
     flex-basis: 0;
     flex-grow: 1;
   }
+}
+
+.body {
+  min-height: 0;
+  flex-basis: 0px;
+  flex-grow: 1;
+  display: inline-flex;
 }
 
 .link {

@@ -1,7 +1,9 @@
 .kanji-list {
-  display: flex;
+  display: inline-flex;
   flex-direction: column;
   gap: 2px;
+
+  min-height: 0;
 }
 
 .kanji-link {

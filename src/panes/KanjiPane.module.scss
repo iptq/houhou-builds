@@ -1,0 +1,16 @@
+.kanji-pane-container {
+  display: flex;
+  width: 100%;
+}
+
+.kanji-list {
+  // display: flex;
+  // flex-direction: column;
+
+  min-height: 0;
+  width: 240px;
+}
+
+.right-side {
+  flex-grow: 5;
+}

@@ -1,6 +1,6 @@
 import { invoke } from "@tauri-apps/api/tauri";
 import useSWR from "swr";
-import { Box, Grid, GridItem, LinkBox, Stack } from "@chakra-ui/layout";
+import { Box, Flex, Grid, GridItem, LinkBox, Stack } from "@chakra-ui/layout";
 
 import styles from "./KanjiPane.module.scss";
 import { Link, useParams } from "react-router-dom";
@@ -23,16 +23,14 @@ export default function KanjiPane() {
   }
 
   return (
-    <>
-      <Grid templateRows="1fr" templateColumns="3fr 5fr">
-        <GridItem className={styles["kanji-list"]}>
-          {data && <KanjiList data={data} selectedCharacter={selectedKanji} />}
-        </GridItem>
+    <Flex gap={3} className={styles['kanji-pane-container']}>
+      <Box className={styles["kanji-list"]}>
+        {data && <KanjiList data={data} selectedCharacter={selectedKanji} />}
+      </Box>
 
-        <GridItem>
-          {selectedKanji ? <KanjiDisplay kanjiCharacter={selectedKanji} /> : "nothing selected"}
-        </GridItem>
-      </Grid>
-    </>
+      <Box className={styles['right-side']}>
+        {selectedKanji ? <KanjiDisplay kanjiCharacter={selectedKanji} /> : "nothing selected"}
+      </Box>
+    </Flex>
   );
 }

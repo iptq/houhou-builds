@@ -1,7 +1,7 @@
 import { Link, RouterProvider, createHashRouter } from "react-router-dom";
 import KanjiPane from "./panes/KanjiPane";
 import classNames from "classnames";
-import { ChakraProvider } from "@chakra-ui/react";
+import { ChakraProvider, Flex } from "@chakra-ui/react";
 import { createBrowserRouter } from "react-router-dom";
 import { Outlet, Route, createRoutesFromElements, matchPath, useLocation } from "react-router";
 import SrsPane from "./panes/SrsPane";
@@ -16,7 +16,7 @@ function Layout() {
   const location = useLocation();
 
   return (
-    <main className={styles.main}>
+    <Flex className={styles.main} direction="column" alignSelf="start">
       <ul className={styles.header}>
         {navLinks.map((navLink) => {
           const active = (
@@ -35,8 +35,10 @@ function Layout() {
         })}
       </ul>
 
-      <Outlet />
-    </main>
+      <div className={styles.body}>
+        <Outlet />
+      </div>
+    </Flex>
   );
 }
 
@@ -58,12 +60,7 @@ export default function App() {
             });
           } else {
             return (
-              <Route
-                key={`route-${route.key}`}
-                index={idx == 0}
-                path={route.path}
-                element={route.element}
-              />
+              <Route key={`route-${route.key}`} index={idx == 0} path={route.path} element={route.element} />
             );
           }
         })}
