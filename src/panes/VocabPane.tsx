@@ -1,3 +1,3 @@
 export default function VocabPane() {
-  return <></>
+  return <></>;
 }

@@ -41,7 +41,11 @@ async fn main() -> Result<()> {
   tauri::Builder::default()
     .manage(KanjiDb(kanji_pool))
     .system_tray(tray)
-    .invoke_handler(tauri::generate_handler![greet, kanji::get_kanji])
+    .invoke_handler(tauri::generate_handler![
+      greet,
+      kanji::get_kanji,
+      kanji::get_single_kanji
+    ])
     .run(tauri::generate_context!())
     .context("error while running tauri application")?;
 

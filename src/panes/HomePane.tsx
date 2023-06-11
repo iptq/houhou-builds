@@ -1,5 +1,3 @@
 export default function HomePane() {
-  return <>
-    hellosu
-  </>
+  return <>hellosu</>;
 }

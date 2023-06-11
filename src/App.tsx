@@ -1,10 +1,10 @@
 import { Link, RouterProvider, createHashRouter } from "react-router-dom";
 import KanjiPane from "./panes/KanjiPane";
 import classNames from "classnames";
-import { ChakraProvider } from '@chakra-ui/react'
+import { ChakraProvider } from "@chakra-ui/react";
 import HomePane from "./panes/HomePane";
 import { createBrowserRouter } from "react-router-dom";
-import { Outlet, Route, createRoutesFromElements, useLocation } from "react-router";
+import { Outlet, Route, createRoutesFromElements, matchPath, useLocation } from "react-router";
 import SrsPane from "./panes/SrsPane";
 import VocabPane from "./panes/VocabPane";
 import SettingsPane from "./panes/SettingsPane";
@@ -20,11 +20,15 @@ function Layout() {
       <ul className={styles.header}>
         {routes.map((route) => {
           if (!route.title) return undefined;
-          const active = route.path == location.pathname;
-          const className = classNames(styles.link, active && styles['link-active']);
-          return <li key={route.path}>
-            <Link to={route.path} className={className}>{route.title}</Link>
-          </li>
+          const active = matchPath({ path: route.path }, location.pathname);
+          const className = classNames(styles.link, active && styles["link-active"]);
+          return (
+            <li key={route.path}>
+              <Link to={route.path} className={className}>
+                {route.title}
+              </Link>
+            </li>
+          );
         })}
       </ul>
 
@@ -38,22 +42,19 @@ export default function App() {
     createRoutesFromElements(
       <Route path="/" element={<Layout />}>
         {routes.map((route, idx) => (
-          <Route
-            key={route.path}
-            index={idx === 0}
-            path={route.path}
-            element={route.element}
-          />
+          <Route key={route.path} index={idx === 0} path={route.path} element={route.element} />
         ))}
-      </Route>
-    )
+      </Route>,
+    ),
   );
 
-  return <StrictMode>
-    <ChakraProvider>
-      <RouterProvider router={router} />
-    </ChakraProvider>
-  </StrictMode>
+  return (
+    <StrictMode>
+      <ChakraProvider>
+        <RouterProvider router={router} />
+      </ChakraProvider>
+    </StrictMode>
+  );
 }
 
 const routes = [
