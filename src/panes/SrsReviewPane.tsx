@@ -50,11 +50,13 @@ export function Component() {
         .then((result) => {
           const newReviews: ReviewItem[] = result.flatMap((srsEntry) => [
             {
+              associatedId: srsEntry.id,
               type: ReviewItemType.MEANING,
               challenge: srsEntry.associated_kanji,
               possibleAnswers: srsEntry.meanings,
             },
             {
+              associatedId: srsEntry.id,
               type: ReviewItemType.READING,
               challenge: srsEntry.associated_kanji,
               possibleAnswers: srsEntry.readings,
@@ -76,14 +78,20 @@ export function Component() {
   const nextItem = reviewQueue[0];
   const possibleAnswers = new Set(nextItem.possibleAnswers);
 
-  const formSubmit = (evt: FormEvent) => {
+  const formSubmit = async (evt: FormEvent) => {
     evt.preventDefault();
     if (!reviewQueue) return;
 
+    const isCorrect = possibleAnswers.has(currentAnswer);
+
+    // Update the backend
+    await invoke("update_srs_item", { item_id: nextItem.associatedId, correct: isCorrect });
+
     // Check the answer
-    if (!possibleAnswers.has(currentAnswer)) {
+    if (!isCorrect) {
       setIsIncorrect(true);
 
+      // push it to the back of the queue
       const lastItem = reviewQueue[reviewQueue.length - 1];
       if (!_.isEqual(lastItem, nextItem)) setReviewQueue([...reviewQueue, nextItem]);
       return;

@@ -64,6 +64,7 @@ async fn main() -> Result<()> {
       srs::get_srs_stats,
       srs::add_srs_item,
       srs::generate_review_batch,
+      srs::update_srs_item,
       kanji::get_kanji,
     ])
     .on_window_event(|event| match event.event() {

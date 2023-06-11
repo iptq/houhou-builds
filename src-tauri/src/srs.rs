@@ -1,7 +1,4 @@
-use std::{
-  ops::Add,
-  time::{Duration, Instant, SystemTime, UNIX_EPOCH},
-};
+use std::time::Duration;
 
 use sqlx::{Row, SqlitePool};
 use tauri::State;
@@ -85,7 +82,6 @@ pub async fn add_srs_item(
   options: Option<AddSrsItemOptions>,
 ) -> Result<(), String> {
   let opts = options.unwrap_or_default();
-  println!("Opts: {opts:?}");
 
   let query_string = format!(
     r#"
@@ -122,6 +118,7 @@ fn default_batch_size() -> u32 {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SrsEntry {
+  id: u32,
   current_grade: u32,
   meanings: Vec<String>,
   readings: Vec<String>,
@@ -152,6 +149,8 @@ pub async fn generate_review_batch(
   let result = result
     .into_iter()
     .map(|row| {
+      let id = row.get("ID");
+
       let meanings: String = row.get("Meanings");
       let meanings = meanings.split(",").map(|s| s.to_owned()).collect();
 
@@ -159,6 +158,7 @@ pub async fn generate_review_batch(
       let readings = readings.split(",").map(|s| s.to_owned()).collect();
 
       SrsEntry {
+        id,
         current_grade: row.get("CurrentGrade"),
         meanings,
         readings,
@@ -168,4 +168,13 @@ pub async fn generate_review_batch(
     .collect();
 
   Ok(result)
+}
+
+#[tauri::command]
+pub async fn update_srs_item(
+  srs_db: State<'_, SrsDb>,
+  item_id: u32,
+  correct: bool,
+) -> Result<(), String> {
+  todo!()
 }
