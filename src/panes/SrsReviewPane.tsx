@@ -18,15 +18,31 @@ import {
 import styles from "./SrsReviewPane.module.scss";
 import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/tauri";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ArrowBackIcon, CheckIcon } from "@chakra-ui/icons";
 import { FormEvent } from "react";
+import ConfirmQuitModal from "../lib/ConfirmQuitModal";
+import * as _ from "lodash-es";
 
 export interface SrsEntry {
   associated_kanji: string;
+  current_grade: number;
+  meanings: string[];
+  readings: string[];
 }
 
-const startingSize = 10;
+export enum ReviewItemType {
+  MEANING,
+  READING,
+}
+
+export interface ReviewItem {
+  type: ReviewItemType;
+  challenge: string;
+  possibleAnswers: string[];
+}
+
+const batchSize = 10;
 
 function Done() {
   return (
@@ -42,54 +58,77 @@ function Done() {
 }
 
 export default function SrsReviewPane() {
-  const [reviewBatch, setReviewBatch] = useState<SrsEntry[] | null>(null);
+  // null = has not started, (.length == 0) = finished
+  const [reviewQueue, setReviewQueue] = useState<ReviewItem[] | null>(null);
+  const [anyProgress, setAnyProgress] = useState(false);
+  const [startingSize, setStartingSize] = useState<number | null>(null);
   const [currentAnswer, setCurrentAnswer] = useState("");
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (!reviewBatch) {
+    if (!reviewQueue) {
       invoke<SrsEntry[]>("generate_review_batch")
         .then((result) => {
-          console.log(result);
-          setReviewBatch(result);
+          // setReviewBatch(result);
+          const newReviews: ReviewItem[] = result.flatMap((srsEntry) => [
+            {
+              type: ReviewItemType.MEANING,
+              challenge: srsEntry.associated_kanji,
+              possibleAnswers: srsEntry.meanings,
+            },
+            {
+              type: ReviewItemType.READING,
+              challenge: srsEntry.associated_kanji,
+              possibleAnswers: srsEntry.readings,
+            },
+          ]);
+          const newReviewsShuffled = _.shuffle(newReviews);
+
+          setReviewQueue(newReviewsShuffled);
+          setStartingSize(newReviews.length);
         })
         .catch((err) => {
           console.error("fuck!", err);
         });
     }
-  }, [reviewBatch, setReviewBatch]);
+  }, [reviewQueue]);
 
   const formSubmit = (evt: FormEvent) => {
     evt.preventDefault();
-    if (reviewBatch == null) return;
+    if (!reviewQueue) return;
 
     // Check the answer
 
     // Set up for next question!
+    setAnyProgress(true);
     setCurrentAnswer("");
-    const [_, ...rest] = reviewBatch;
-    setReviewBatch(rest);
+    const [_, ...rest] = reviewQueue;
+    setReviewQueue(rest);
   };
 
   const renderInside = () => {
-    if (!reviewBatch) return <Spinner />;
+    if (!reviewQueue) return <Spinner />;
 
-    if (reviewBatch.length == 0) return <Done />;
+    if (reviewQueue.length == 0) return <Done />;
 
-    const progressValue = startingSize - reviewBatch.length;
-    const nextItem = reviewBatch[0];
+    const nextItem = reviewQueue[0];
+
+    console.log("next item", nextItem);
 
     return (
       <>
-        <Progress
-          colorScheme="linkedin"
-          hasStripe
-          isAnimated
-          max={startingSize}
-          value={progressValue}
-        />
+        {startingSize && (
+          <Progress
+            colorScheme="linkedin"
+            hasStripe
+            isAnimated
+            max={startingSize}
+            value={startingSize - reviewQueue.length}
+          />
+        )}
 
-        <h1 className={styles["test-word"]}>{nextItem.associated_kanji}</h1>
+        <h1 className={styles["test-word"]}>{nextItem.challenge}</h1>
 
         <details>
           <summary>Debug</summary>
@@ -117,38 +156,25 @@ export default function SrsReviewPane() {
     );
   };
 
+  const quit = () => {
+    if (!reviewQueue || !anyProgress) {
+      return navigate("/");
+    }
+
+    onOpen();
+  };
+
   return (
     <main className={styles.main}>
       <Container>
-        <Button onClick={onOpen}>
+        <Button onClick={quit}>
           <ArrowBackIcon />
           Back
         </Button>
         <div className={styles.container}>{renderInside()}</div>
       </Container>
 
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Confirm Quit</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            Are you sure you want to go back? Your current progress into this batch will not be
-            saved.
-          </ModalBody>
-
-          <ModalFooter>
-            <Button variant="ghost" onClick={onClose}>
-              Cancel
-            </Button>
-            <Link to="/">
-              <Button colorScheme="red" mr={3}>
-                Close
-              </Button>
-            </Link>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+      <ConfirmQuitModal isOpen={isOpen} onClose={onClose} />
     </main>
   );
 }

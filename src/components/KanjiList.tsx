@@ -6,6 +6,7 @@ import styles from "./KanjiList.module.scss";
 import { Kanji } from "../types/Kanji";
 import { Input, Spinner } from "@chakra-ui/react";
 import { useCallback, useEffect, useState } from "react";
+import SearchBar from "./SearchBar";
 
 export interface KanjiListProps {
   kanjiList: Kanji[];
@@ -56,8 +57,8 @@ export function KanjiList({
     const className = classNames(styles["kanji-link"], active && styles["kanji-link-active"]);
     return (
       <Link key={kanji.character} className={className} to={`/kanji/${kanji.character}`}>
-        <Grid templateRows="repeat(2, 1fr)" templateColumns="1fr 3fr">
-          <GridItem rowSpan={2} style={{ fontSize: "24px", textAlign: "center" }}>
+        <Grid templateRows="repeat(2, 1fr)" templateColumns="auto 1fr" columnGap={4}>
+          <GridItem rowSpan={2} className={styles["kanji-link-character"]}>
             {kanji.character}
           </GridItem>
           <GridItem>{kanji.meanings[0].meaning}</GridItem>
@@ -72,7 +73,7 @@ export function KanjiList({
   return (
     <>
       <div className={styles["search-container"]}>
-        <Input autoFocus placeholder="Search..." />
+        <SearchBar />
       </div>
 
       <small className={styles["result-count"]}>

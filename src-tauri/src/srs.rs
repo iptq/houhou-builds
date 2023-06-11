@@ -124,6 +124,7 @@ fn default_batch_size() -> u32 {
 pub struct SrsEntry {
   current_grade: u32,
   meanings: Vec<String>,
+  readings: Vec<String>,
   associated_kanji: String,
 }
 
@@ -153,9 +154,14 @@ pub async fn generate_review_batch(
     .map(|row| {
       let meanings: String = row.get("Meanings");
       let meanings = meanings.split(",").map(|s| s.to_owned()).collect();
+
+      let readings: String = row.get("Readings");
+      let readings = readings.split(",").map(|s| s.to_owned()).collect();
+
       SrsEntry {
         current_grade: row.get("CurrentGrade"),
         meanings,
+        readings,
         associated_kanji: row.get("AssociatedKanji"),
       }
     })
