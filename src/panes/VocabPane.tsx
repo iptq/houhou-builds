@@ -1,3 +1,5 @@
-export default function VocabPane() {
+export function Component() {
   return <></>;
 }
+
+Component.displayName = "VocabPane";

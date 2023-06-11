@@ -10,7 +10,12 @@ import {
 } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 
-export default function ConfirmQuitModal({ isOpen, onClose }) {
+export interface ConfirmQuitModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export default function ConfirmQuitModal({ isOpen, onClose }: ConfirmQuitModalProps) {
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />

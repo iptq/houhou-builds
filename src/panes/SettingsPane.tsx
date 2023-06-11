@@ -1,3 +1,5 @@
-export default function SettingsPane() {
+export function Component() {
   return <></>;
 }
+
+Component.displayName = "SettingsPane";

@@ -1,7 +1,7 @@
 import DashboardReviewStats from "../components/DashboardReviewStats";
 import styles from "./SrsPane.module.scss";
 
-export default function SrsPane() {
+export function Component() {
   return (
     <main className={styles.main}>
       <DashboardReviewStats />
@@ -10,3 +10,5 @@ export default function SrsPane() {
     </main>
   );
 }
+
+Component.displayName = "SrsPane";

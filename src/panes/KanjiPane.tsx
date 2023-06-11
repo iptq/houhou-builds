@@ -15,7 +15,7 @@ export interface GetKanjiResult {
   kanji: Kanji[];
 }
 
-export default function KanjiPane() {
+export function Component() {
   const { selectedKanji } = useParams();
   const { data: baseData, error, isLoading } = useSWR("get_kanji", invoke<GetKanjiResult>);
 
@@ -59,3 +59,5 @@ export default function KanjiPane() {
     </Flex>
   );
 }
+
+Component.displayName = "KanjiPane";

@@ -1,16 +1,11 @@
 import { Link, RouterProvider, createHashRouter } from "react-router-dom";
-import KanjiPane from "./panes/KanjiPane";
 import classNames from "classnames";
 import { ChakraProvider, Flex } from "@chakra-ui/react";
 import { createBrowserRouter } from "react-router-dom";
 import { Outlet, Route, createRoutesFromElements, matchPath, useLocation } from "react-router";
-import SrsPane from "./panes/SrsPane";
-import VocabPane from "./panes/VocabPane";
-import SettingsPane from "./panes/SettingsPane";
 import { StrictMode } from "react";
 
 import styles from "./App.module.scss";
-import SrsReviewPane from "./panes/SrsReviewPane";
 
 function Layout() {
   const location = useLocation();
@@ -18,7 +13,7 @@ function Layout() {
   return (
     <Flex className={styles.main} direction="column" alignSelf="start">
       <ul className={styles.header}>
-        {navLinks.map((navLink) => {
+        {navLinks.map((navLink: NavLink) => {
           const active = (
             navLink.subPaths ? navLink.subPaths : [{ key: navLink.key, path: navLink.path }]
           ).some((item) => matchPath({ path: item.path }, location.pathname));
@@ -54,7 +49,7 @@ export default function App() {
                   key={`route-${route.key}-${subRoute.key}`}
                   index={idx + idx2 == 0}
                   path={subRoute.path}
-                  element={subRoute.element ?? route.element}
+                  lazy={() => import(`./panes/${subRoute.element ?? route.element}.tsx`)}
                 />
               );
             });
@@ -64,7 +59,7 @@ export default function App() {
                 key={`route-${route.key}`}
                 index={idx == 0}
                 path={route.path}
-                element={route.element}
+                lazy={() => import(`./panes/${route.element}.tsx`)}
               />
             );
           }
@@ -82,26 +77,41 @@ export default function App() {
   );
 }
 
-const navLinks = [
+type NavLinkPath =
+  | {
+      path: string;
+      subPaths?: undefined;
+    }
+  | {
+      path?: undefined;
+      subPaths: { key: string; path: string; element?: string }[];
+    };
+type NavLink = {
+  key: string;
+  title: string;
+  element: string;
+} & NavLinkPath;
+
+const navLinks: NavLink[] = [
   // { key: "home", path: "/", title: "Home", element: <HomePane /> },
   {
     key: "srs",
     title: "SRS",
-    element: <SrsPane />,
+    element: "SrsPane",
     subPaths: [
       { key: "index", path: "/" },
-      { key: "review", path: "/srs/review", element: <SrsReviewPane /> },
+      { key: "review", path: "/srs/review", element: "SrsReviewPane" },
     ],
   },
   {
     key: "kanji",
     title: "Kanji",
-    element: <KanjiPane />,
+    element: "KanjiPane",
     subPaths: [
       { key: "index", path: "/kanji" },
       { key: "selected", path: "/kanji/:selectedKanji" },
     ],
   },
-  { key: "vocab", path: "/vocab", title: "Vocab", element: <VocabPane /> },
-  { key: "settings", path: "/settings", title: "Settings", element: <SettingsPane /> },
+  { key: "vocab", path: "/vocab", title: "Vocab", element: "VocabPane" },
+  { key: "settings", path: "/settings", title: "Settings", element: "SettingsPane" },
 ];

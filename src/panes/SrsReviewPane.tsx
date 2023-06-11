@@ -57,7 +57,7 @@ function Done() {
   );
 }
 
-export default function SrsReviewPane() {
+export function Component() {
   // null = has not started, (.length == 0) = finished
   const [reviewQueue, setReviewQueue] = useState<ReviewItem[] | null>(null);
   const [anyProgress, setAnyProgress] = useState(false);
@@ -178,3 +178,5 @@ export default function SrsReviewPane() {
     </main>
   );
 }
+
+Component.displayName = "SrsReviewPane";
