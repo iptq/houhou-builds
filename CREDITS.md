@@ -1,0 +1,2 @@
+- [Houhou SRS](http://houhou-srs.com) ([CCPL](https://github.com/Doublevil/Houhou-SRS/blob/master/LICENSE.md))
+- [KRADFILE](https://www.edrdg.org/krad/kradinf.html) ([EDRDG](http://www.edrdg.org/edrdg/licence.html))

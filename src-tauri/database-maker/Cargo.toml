@@ -1,0 +1,10 @@
+[package]
+name = "database-maker"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.71"
+clap = { version = "4.3.2", features = ["derive"] }
+sqlx = { version = "0.6.3", features = ["runtime-tokio-rustls", "sqlite"] }
+tokio = { version = "1.28.2", features = ["full"] }
