@@ -10,6 +10,8 @@ use sqlx::{
   Decode, Encode, Sqlite, Type,
 };
 
+pub const TICK_MULTIPLIER: i64 = 1_000_000_000;
+
 #[derive(Clone, Copy)]
 pub struct Ticks(pub i64);
 
@@ -37,7 +39,7 @@ impl Into<Duration> for Ticks {
 
 impl From<Duration> for Ticks {
   fn from(value: Duration) -> Self {
-    Ticks(value.as_secs() as i64 * 1_000_000_000)
+    Ticks(value.as_secs() as i64 * TICK_MULTIPLIER)
   }
 }
 

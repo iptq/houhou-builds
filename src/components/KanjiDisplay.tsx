@@ -52,7 +52,7 @@ export default function KanjiDisplay({ kanjiCharacter }: KanjiDisplayProps) {
     srsPart = (
       <Alert status="info">
         <AlertIcon />
-        <p>This character is being tracked in SRS!</p>
+        <p>You are learning this item!</p>
 
         {isValid(nextAnswerDate) && (
           <p>

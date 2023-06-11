@@ -4,6 +4,7 @@ import {
   Input,
   InputGroup,
   InputLeftElement,
+  InputRightElement,
   Progress,
   Spinner,
   useDisclosure,
@@ -11,12 +12,20 @@ import {
 import styles from "./SrsReviewPane.module.scss";
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/tauri";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, ScrollRestoration, useNavigate } from "react-router-dom";
 import { ArrowBackIcon } from "@chakra-ui/icons";
 import ConfirmQuitModal from "../components/utils/ConfirmQuitModal";
 import * as _ from "lodash-es";
 import { romajiToKana } from "../lib/kanaHelper";
-import { ReviewItem, ReviewItemType, SrsEntry } from "../types/Srs";
+import {
+  ReviewItem,
+  ReviewItemType,
+  SrsEntry,
+  SrsQuestionGroup,
+  allQuestionsAnswered,
+  groupUpdatedLevel,
+  isGroupCorrect,
+} from "../lib/srs";
 import classNames from "classnames";
 
 const batchSize = 10;
@@ -37,10 +46,12 @@ function Done() {
 export function Component() {
   // null = has not started, (.length == 0) = finished
   const [reviewQueue, setReviewQueue] = useState<ReviewItem[] | null>(null);
+  const [completedQueue, setCompletedQueue] = useState<ReviewItem[]>([]);
+
   const [anyProgress, setAnyProgress] = useState(false);
   const [startingSize, setStartingSize] = useState<number | null>(null);
   const [currentAnswer, setCurrentAnswer] = useState("");
-  const [isIncorrect, setIsIncorrect] = useState(false);
+  const [incorrectTimes, setIncorrectTimes] = useState(0);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const navigate = useNavigate();
 
@@ -48,20 +59,36 @@ export function Component() {
     if (!reviewQueue) {
       invoke<SrsEntry[]>("generate_review_batch")
         .then((result) => {
-          const newReviews: ReviewItem[] = result.flatMap((srsEntry) => [
-            {
-              associatedId: srsEntry.id,
+          const newReviews: ReviewItem[] = result.flatMap((srsEntry) => {
+            // L @ breaking type safety, but this is mutually recursive too
+            const srsQuestionGroup: SrsQuestionGroup = {
+              srsEntry,
+              questions: {},
+            } as SrsQuestionGroup;
+
+            const meaningQuestion: ReviewItem = {
+              parent: srsQuestionGroup,
               type: ReviewItemType.MEANING,
               challenge: srsEntry.associated_kanji,
               possibleAnswers: srsEntry.meanings,
-            },
-            {
-              associatedId: srsEntry.id,
+              isCorrect: null,
+              timesRepeated: 0,
+            };
+
+            const readingQuestion: ReviewItem = {
+              parent: srsQuestionGroup,
               type: ReviewItemType.READING,
               challenge: srsEntry.associated_kanji,
               possibleAnswers: srsEntry.readings,
-            },
-          ]);
+              isCorrect: null,
+              timesRepeated: 0,
+            };
+
+            srsQuestionGroup.questions.meaningQuestion = meaningQuestion;
+            srsQuestionGroup.questions.readingQuestion = readingQuestion;
+
+            return [meaningQuestion, readingQuestion];
+          });
           const newReviewsShuffled = _.shuffle(newReviews);
 
           setReviewQueue(newReviewsShuffled);
@@ -75,7 +102,7 @@ export function Component() {
 
   if (!reviewQueue) return <Spinner />;
   if (reviewQueue.length == 0) return <Done />;
-  const nextItem = reviewQueue[0];
+  const [nextItem, ...restOfQueue] = reviewQueue;
   const possibleAnswers = new Set(nextItem.possibleAnswers);
 
   const formSubmit = async (evt: FormEvent) => {
@@ -83,28 +110,50 @@ export function Component() {
     if (!reviewQueue) return;
 
     const isCorrect = possibleAnswers.has(currentAnswer);
+    nextItem.isCorrect =
+      new Map([
+        [null, isCorrect],
+        [false, false],
+        [true, isCorrect],
+      ]).get(nextItem.isCorrect) ?? isCorrect;
 
-    // Update the backend
-    const params = { itemId: nextItem.associatedId, correct: isCorrect };
-    const result = await invoke("update_srs_item", params);
-    console.log("result", result);
+    // Figure out if we need to update the backend
+    if (allQuestionsAnswered(nextItem.parent)) {
+      console.log("SHIET");
 
-    // Check the answer
+      const group = nextItem.parent;
+      const newLevel = groupUpdatedLevel(group);
+
+      const params = {
+        itemId: nextItem.parent.srsEntry.id,
+        correct: isGroupCorrect(nextItem.parent),
+        newGrade: newLevel.value,
+        delay: newLevel.delay,
+      };
+
+      const result = await invoke("update_srs_item", params);
+      console.log("result", result);
+    }
+
+    // If it's wrong this time
     if (!isCorrect) {
-      setIsIncorrect(true);
-
-      // push it to the back of the queue
-      const lastItem = reviewQueue[reviewQueue.length - 1];
-      if (!_.isEqual(lastItem, nextItem)) setReviewQueue([...reviewQueue, nextItem]);
+      setCurrentAnswer("");
+      setIncorrectTimes(incorrectTimes + 1);
       return;
     }
 
     // Set up for next question!
     setAnyProgress(true);
-    setIsIncorrect(false);
+    setIncorrectTimes(0);
     setCurrentAnswer("");
-    const [_currentItem, ...rest] = reviewQueue;
-    setReviewQueue(rest);
+
+    if (nextItem.isCorrect || nextItem.timesRepeated > 0) {
+      setCompletedQueue([...completedQueue, nextItem]);
+      setReviewQueue(restOfQueue);
+    } else {
+      nextItem.timesRepeated++;
+      setReviewQueue([...restOfQueue, nextItem]);
+    }
   };
 
   const inputBox = (kanaInput: boolean) => {
@@ -115,8 +164,12 @@ export function Component() {
       setCurrentAnswer(newValue);
     };
 
-    const className = classNames(styles["input-box"], isIncorrect && styles["incorrect"]);
-    const placeholder = isIncorrect ? "Wrong! Try again..." : "Enter your answer...";
+    const className = classNames(styles["input-box"], incorrectTimes > 0 && styles["incorrect"]);
+    const placeholder =
+      {
+        0: "Enter your answer...",
+        1: "Wrong! Try again...",
+      }[incorrectTimes] || `Answer is: ${nextItem.possibleAnswers.join(", ")}`;
 
     return (
       <InputGroup>
@@ -140,13 +193,16 @@ export function Component() {
 
     return (
       <>
+        <p>{JSON.stringify(completedQueue.map((x) => x.challenge))}</p>
+        <p>{JSON.stringify(reviewQueue.map((x) => x.challenge))}</p>
+
         {startingSize && (
           <Progress
             colorScheme="linkedin"
             hasStripe
             isAnimated
             max={startingSize}
-            value={startingSize - reviewQueue.length}
+            value={completedQueue.length}
           />
         )}
 
@@ -181,11 +237,6 @@ export function Component() {
           <ArrowBackIcon />
           Back
         </Button>
-
-        <details>
-          <summary>Debug</summary>
-          <pre>{JSON.stringify(nextItem, null, 2)}</pre>
-        </details>
 
         <div className={styles.container}>{renderInside()}</div>
       </Container>

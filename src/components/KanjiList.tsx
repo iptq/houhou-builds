@@ -3,11 +3,11 @@ import classNames from "classnames";
 import { Link } from "react-router-dom";
 import { Badge, Grid, GridItem } from "@chakra-ui/layout";
 import styles from "./KanjiList.module.scss";
-import { Kanji } from "../types/Kanji";
+import { Kanji } from "../lib/kanji";
 import { Input, Spinner } from "@chakra-ui/react";
 import { useCallback, useEffect, useState } from "react";
 import SearchBar from "./SearchBar";
-import GradeBadge from "./utils/GradeBadge";
+import LevelBadge from "./utils/LevelBadge";
 
 export interface KanjiListProps {
   kanjiList: Kanji[];
@@ -57,6 +57,8 @@ export function KanjiList({
 
   const renderKanjiItem = (kanji: Kanji, active: boolean) => {
     const className = classNames(styles["kanji-link"], active && styles["kanji-link-active"]);
+    if (kanji.srs_info) console.log("kanji", kanji);
+
     return (
       <Link key={kanji.character} className={className} to={`/kanji/${kanji.character}`}>
         <Grid templateRows="repeat(2, 1fr)" templateColumns="auto 1fr" columnGap={4}>
@@ -65,7 +67,7 @@ export function KanjiList({
           </GridItem>
           <GridItem>{kanji.meanings[0].meaning}</GridItem>
           <GridItem className={styles.badges}>
-            <GradeBadge grade={kanji.srs_info?.current_grade} />
+            <LevelBadge grade={kanji.srs_info?.current_grade} />
             <Badge>#{kanji.most_used_rank} common</Badge>
           </GridItem>
         </Grid>

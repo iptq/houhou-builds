@@ -3,7 +3,10 @@ use std::time::Duration;
 use sqlx::{Row, SqlitePool};
 use tauri::State;
 
-use crate::{kanji::KanjiDb, utils::Ticks};
+use crate::{
+  kanji::KanjiDb,
+  utils::{Ticks, TICK_MULTIPLIER},
+};
 
 pub struct SrsDb(pub SqlitePool);
 
@@ -217,6 +220,8 @@ pub async fn generate_review_batch(
 pub async fn update_srs_item(
   srs_db: State<'_, SrsDb>,
   item_id: u32,
+  delay: i64,
+  new_grade: u32,
   correct: bool,
 ) -> Result<(), String> {
   let (success, failure) = match correct {
@@ -224,17 +229,23 @@ pub async fn update_srs_item(
     false => (0, 1),
   };
 
+  // Kanji.Interface/ViewModels/Partial/Srs/SrsReviewViewModel.cs:600
+
   sqlx::query(
     r#"
     UPDATE SrsEntrySet
     SET
       SuccessCount = SuccessCount + ?,
-      FailureCount = FailureCount + ?
+      FailureCount = FailureCount + ?,
+      NextAnswerDate = NextAnswerDate + ?,
+      CurrentGrade = ?
     WHERE ID = ?
    "#,
   )
   .bind(success)
   .bind(failure)
+  .bind(delay * TICK_MULTIPLIER)
+  .bind(new_grade)
   .bind(item_id)
   .execute(&srs_db.0)
   .await
