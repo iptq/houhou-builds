@@ -6,6 +6,7 @@ import styles from "./KanjiPane.module.scss";
 import { Link, useParams } from "react-router-dom";
 import KanjiDisplay from "../components/KanjiDisplay";
 import { Kanji } from "../types/Kanji";
+import classNames from "classnames";
 
 export interface GetKanjiResult {
   count: number;
@@ -25,21 +26,29 @@ function KanjiList({ data, selectedCharacter }: KanjiListProps) {
       </small>
 
       <div className={styles["kanji-list-scroll"]}>
-        {data.kanji.map((kanji) => (
-          <Link
-            key={kanji.character}
-            className={styles["kanji-link"]}
-            to={`/kanji/${kanji.character}`}
-          >
-            <Grid templateRows="repeat(2, 1fr)" templateColumns="1fr 3fr">
-              <GridItem rowSpan={2} style={{ fontSize: "24px", textAlign: "center" }}>
-                {kanji.character}
-              </GridItem>
-              <GridItem>{kanji.meaning}</GridItem>
-              <GridItem>#{kanji.most_used_rank} most used</GridItem>
-            </Grid>
-          </Link>
-        ))}
+        <div className={styles["kanji-list-inner"]}>
+          {data.kanji.map((kanji) => {
+            const active = kanji.character == selectedCharacter;
+            const className = classNames(styles['kanji-link'], active && styles['kanji-link-active'])
+            return <Link
+              key={kanji.character}
+              className={className}
+              to={`/kanji/${kanji.character}`}
+            >
+              <Grid templateRows="repeat(2, 1fr)" templateColumns="1fr 3fr">
+                <GridItem rowSpan={2} style={{ fontSize: "24px", textAlign: "center" }}>
+                  {kanji.character}
+                </GridItem>
+                <GridItem>{kanji.meaning}</GridItem>
+                <GridItem>
+                  <small>
+                    #{kanji.most_used_rank} most used
+                  </small>
+                </GridItem>
+              </Grid>
+            </Link>
+          })}
+        </div>
       </div>
     </>
   );

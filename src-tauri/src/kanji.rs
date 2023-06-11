@@ -29,6 +29,7 @@ impl Kanji {
     let character = row.get("Character");
     let meaning = row.get("Meaning");
     let most_used_rank = row.get("MostUsedRank");
+
     Kanji {
       character,
       meaning,

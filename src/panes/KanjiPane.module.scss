@@ -6,12 +6,24 @@
 
 .kanji-link {
   padding: 4px 8px;
-  border: 1px solid lightgray;
+  border-left: 4px solid transparent;
+  user-select: none;
 }
 
 .kanji-list-scroll {
+  direction: rtl;
+  overflow-y: scroll;
+}
+
+.kanji-list-inner {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  overflow-y: scroll;
+
+  direction: ltr;
+}
+
+.kanji-link-active {
+  border-left-color: #09c;
+  background-color: hsl(203, 91%, 91%);
 }
