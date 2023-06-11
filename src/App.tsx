@@ -2,7 +2,6 @@ import { Link, RouterProvider, createHashRouter } from "react-router-dom";
 import KanjiPane from "./panes/KanjiPane";
 import classNames from "classnames";
 import { ChakraProvider } from "@chakra-ui/react";
-import HomePane from "./panes/HomePane";
 import { createBrowserRouter } from "react-router-dom";
 import { Outlet, Route, createRoutesFromElements, matchPath, useLocation } from "react-router";
 import SrsPane from "./panes/SrsPane";
@@ -25,8 +24,9 @@ function Layout() {
           ).some((item) => matchPath({ path: item.path }, location.pathname));
           const mainPath = navLink.subPaths ? navLink.subPaths[0].path : navLink.path;
           const className = classNames(styles.link, active && styles["link-active"]);
+
           return (
-            <li key={navLink.path}>
+            <li key={`navLink-${navLink.key}`}>
               <Link to={mainPath} className={className}>
                 {navLink.title}
               </Link>
@@ -49,7 +49,7 @@ export default function App() {
             return route.subPaths.map((subRoute, idx2) => {
               return (
                 <Route
-                  key={`${route.key}-${subRoute.key}`}
+                  key={`route-${route.key}-${subRoute.key}`}
                   index={idx + idx2 == 0}
                   path={subRoute.path}
                   element={subRoute.element ?? route.element}
@@ -58,7 +58,12 @@ export default function App() {
             });
           } else {
             return (
-              <Route key={route.path} index={idx == 0} path={route.path} element={route.element} />
+              <Route
+                key={`route-${route.key}`}
+                index={idx == 0}
+                path={route.path}
+                element={route.element}
+              />
             );
           }
         })}

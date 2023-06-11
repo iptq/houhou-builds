@@ -6,8 +6,9 @@ extern crate derivative;
 #[macro_use]
 extern crate serde;
 
-mod kanji;
-mod srs;
+pub mod kanji;
+pub mod srs;
+pub mod utils;
 
 use std::process;
 use std::str::FromStr;
@@ -61,6 +62,7 @@ async fn main() -> Result<()> {
     .system_tray(tray)
     .invoke_handler(tauri::generate_handler![
       srs::get_srs_stats,
+      srs::add_srs_item,
       kanji::get_kanji,
     ])
     .on_window_event(|event| match event.event() {

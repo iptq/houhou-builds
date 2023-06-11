@@ -1,3 +1,6 @@
+$navLinkAccentColor: #09c;
+$navLinkColor: hsl(203, 91%, 91%);
+
 main.main {
   display: flex;
   flex-direction: column;
@@ -22,10 +25,20 @@ main.main {
   text-align: center;
   padding: 12px;
   border-top: 4px solid transparent;
+  transition: background-color 0.1s ease-out, border-top-color 0.1s ease-out;
+
+  // Make the top bar seem less web-ish
   user-select: none;
+  cursor: default;
+  -webkit-user-drag: none;
+
+  &:not(.link-active):hover {
+    border-top-color: transparent;
+    background-color: #f4f4f4;
+  }
 }
 
 .link-active {
-  border-top-color: #09c;
-  background-color: hsl(203, 91%, 91%);
+  border-top-color: $navLinkAccentColor;
+  background-color: $navLinkColor;
 }

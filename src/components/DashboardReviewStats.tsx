@@ -29,6 +29,11 @@ interface SrsStats {
   num_failure: number;
 }
 
+interface Stat {
+  label: string;
+  value: any;
+}
+
 export default function DashboardReviewStats() {
   const {
     data: srsStats,
@@ -44,12 +49,12 @@ export default function DashboardReviewStats() {
       </>
     );
 
-  const averageSuccess = srsStats.num_success / ((srsStats.num_success + srsStats.num_failure) || 1);
+  const averageSuccess = srsStats.num_success / (srsStats.num_success + srsStats.num_failure || 1);
   const averageSuccessStr = `${Math.round(averageSuccess * 10000) / 100}%`;
 
   const canReview = srsStats.reviews_available == 0;
 
-  const generateStat = (stat) => {
+  const generateStat = (stat: Stat) => {
     return (
       <GridItem>
         <Stat>
@@ -67,12 +72,16 @@ export default function DashboardReviewStats() {
           <Stat>
             <StatLabel>reviews available</StatLabel>
             <StatNumber>{srsStats.reviews_available}</StatNumber>
-            <ConditionalWrapper condition={canReview} wrapper={children => <Tooltip label="Add items to start reviewing">{children}</Tooltip>}>
-              <Link to="/srs/review">
-                <Button isDisabled={canReview} colorScheme="blue">
-                  Start reviewing <ArrowRightIcon marginLeft={3} />
-                </Button>
-              </Link>
+            <ConditionalWrapper
+              condition={canReview}
+              wrapper={(children) => (
+                <Tooltip label="Add items to start reviewing">{children}</Tooltip>
+              )}
+              elseWrapper={(children) => <Link to="/srs/review">{children}</Link>}
+            >
+              <Button isDisabled={canReview} colorScheme="blue">
+                Start reviewing <ArrowRightIcon marginLeft={3} />
+              </Button>
             </ConditionalWrapper>
           </Stat>
         </GridItem>

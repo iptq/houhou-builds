@@ -1,0 +1,29 @@
+.kanji-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.kanji-link {
+  padding: 4px 8px;
+  border-left: 4px solid transparent;
+  user-select: none;
+}
+
+.kanji-list-scroll {
+  direction: rtl;
+  overflow-y: scroll;
+}
+
+.kanji-list-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  direction: ltr;
+}
+
+.kanji-link-active {
+  border-left-color: #09c;
+  background-color: hsl(203, 91%, 91%);
+}

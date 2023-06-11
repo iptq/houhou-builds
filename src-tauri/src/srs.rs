@@ -6,6 +6,8 @@ use std::{
 use sqlx::{Row, SqlitePool};
 use tauri::State;
 
+use crate::utils::Ticks;
+
 pub struct SrsDb(pub SqlitePool);
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -38,17 +40,8 @@ pub async fn get_srs_stats(db: State<'_, SrsDb>) -> Result<SrsStats, String> {
   .map_err(|err| err.to_string())?;
 
   // reviews query
-  let utc_now = SystemTime::now()
-    .duration_since(UNIX_EPOCH)
-    .map_err(|err| err.to_string())?
-    .as_secs() as i64
-    * 1000000000;
-  let utc_tomorrow = SystemTime::now()
-    .duration_since(UNIX_EPOCH)
-    .map_err(|err| err.to_string())?
-    .add(Duration::from_secs(60 * 60 * 24))
-    .as_secs() as i64
-    * 1000000000;
+  let utc_now = Ticks::now().map_err(|err| err.to_string())?;
+  let utc_tomorrow = utc_now + Duration::from_secs(60 * 60 * 24);
   let row2 = sqlx::query(
     r#"
     SELECT COUNT(*) AS reviews
@@ -78,4 +71,39 @@ pub async fn get_srs_stats(db: State<'_, SrsDb>) -> Result<SrsStats, String> {
     num_success: row.try_get("num_success").unwrap_or(0),
     num_failure: row.try_get("num_failure").unwrap_or(0),
   })
+}
+
+#[derive(Debug, Derivative, Serialize, Deserialize)]
+#[derivative(Default)]
+pub struct AddSrsItemOptions {
+  character: String,
+}
+
+#[tauri::command]
+pub async fn add_srs_item(
+  db: State<'_, SrsDb>,
+  options: Option<AddSrsItemOptions>,
+) -> Result<(), String> {
+  let opts = options.unwrap_or_default();
+  println!("Opts: {opts:?}");
+
+  let query_string = format!(
+    r#"
+    INSERT INTO SrsEntrySet
+      (CreationDate, AssociatedKanji, NextAnswerDate,
+      Meanings, Readings)
+      VALUES
+      (?, ?, ?, '', '')
+    "#
+  );
+
+  let utc_now = Ticks::now().map_err(|err| err.to_string())?;
+  let query = sqlx::query(&query_string)
+    .bind(&utc_now)
+    .bind(&opts.character)
+    .bind(&utc_now);
+
+  query.execute(&db.0).await.map_err(|err| err.to_string())?;
+
+  Ok(())
 }
