@@ -83,6 +83,9 @@ export function Component() {
     // Check the answer
     if (!possibleAnswers.has(currentAnswer)) {
       setIsIncorrect(true);
+
+      const lastItem = reviewQueue[reviewQueue.length - 1];
+      if (!_.isEqual(lastItem, nextItem)) setReviewQueue([...reviewQueue, nextItem]);
       return;
     }
 
@@ -90,7 +93,7 @@ export function Component() {
     setAnyProgress(true);
     setIsIncorrect(false);
     setCurrentAnswer("");
-    const [_, ...rest] = reviewQueue;
+    const [_currentItem, ...rest] = reviewQueue;
     setReviewQueue(rest);
   };
 
