@@ -1,11 +1,23 @@
+main.main {
+  display: flex;
+  flex-direction: column;
+}
+
 .header {
   display: flex;
   flex-direction: row;
   justify-content: space-evenly;
 
   list-style-type: none;
+}
 
-  li {
-    padding-left: 0;
-  }
+.link {
+  flex-grow: 1;
+  display: inline-block;
+  padding: 12px;
+
+}
+
+.link-active {
+  background-color: skyblue;
 }

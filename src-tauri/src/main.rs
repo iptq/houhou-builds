@@ -15,6 +15,7 @@ use sqlx::{
   sqlite::{SqliteConnectOptions, SqlitePoolOptions},
   SqlitePool,
 };
+use tauri::SystemTray;
 
 use crate::kanji::KanjiDb;
 
@@ -26,14 +27,20 @@ fn greet(name: &str) -> String {
 
 #[tokio::main]
 async fn main() -> Result<()> {
+  // Open kanji db
   let kanji_db_options =
     SqliteConnectOptions::from_str("./KanjiDatabase.sqlite")?.read_only(true);
   let kanji_pool = SqlitePoolOptions::new()
     .connect_with(kanji_db_options)
     .await?;
 
+  // System tray
+  let tray = SystemTray::new();
+
+  // Build tauri
   tauri::Builder::default()
     .manage(KanjiDb(kanji_pool))
+    .system_tray(tray)
     .invoke_handler(tauri::generate_handler![greet, kanji::get_kanji])
     .run(tauri::generate_context!())
     .context("error while running tauri application")?;

@@ -1,4 +1,5 @@
 export interface Kanji {
   character: string;
-  translation: string;
+  meaning: string;
+  most_used_rank: number;
 }

@@ -1,23 +1,35 @@
 import { Link, RouterProvider, createHashRouter } from "react-router-dom";
-import styles from "./App.module.scss";
 import KanjiPane from "./panes/KanjiPane";
+import classNames from "classnames";
+import { ChakraProvider } from '@chakra-ui/react'
 import HomePane from "./panes/HomePane";
 import { createBrowserRouter } from "react-router-dom";
-import { Outlet, Route, createRoutesFromElements } from "react-router";
+import { Outlet, Route, createRoutesFromElements, useLocation } from "react-router";
+import SrsPane from "./panes/SrsPane";
+import VocabPane from "./panes/VocabPane";
+import SettingsPane from "./panes/SettingsPane";
+import { StrictMode } from "react";
+
+import styles from "./App.module.scss";
 
 function Layout() {
+  const location = useLocation();
+
   return (
-    <>
+    <main className={styles.main}>
       <ul className={styles.header}>
-        {routes.map((route) => (
-          <li key={route.path}>
-            <Link to={route.path}>{route.title}</Link>
+        {routes.map((route) => {
+          if (!route.title) return undefined;
+          const active = route.path == location.pathname;
+          const className = classNames(styles.link, active && styles['link-active']);
+          return <li key={route.path}>
+            <Link to={route.path} className={className}>{route.title}</Link>
           </li>
-        ))}
+        })}
       </ul>
 
       <Outlet />
-    </>
+    </main>
   );
 }
 
@@ -37,10 +49,18 @@ export default function App() {
     )
   );
 
-  return <RouterProvider router={router} />;
+  return <StrictMode>
+    <ChakraProvider>
+      <RouterProvider router={router} />
+    </ChakraProvider>
+  </StrictMode>
 }
 
 const routes = [
-  { path: "/", title: "Home", element: <HomePane /> },
-  { path: "/kanji", title: "Kanji", element: <KanjiPane /> },
+  { key: "home", path: "/", title: "Home", element: <HomePane /> },
+  { key: "srs", path: "/srs", title: "SRS", element: <SrsPane /> },
+  { key: "kanji", path: "/kanji", title: "Kanji", element: <KanjiPane /> },
+  { key: "kanjiSelected", path: "/kanji/:selectedKanji", element: <KanjiPane /> },
+  { key: "vocab", path: "/vocab", title: "Vocab", element: <VocabPane /> },
+  { key: "settings", path: "/settings", title: "Settings", element: <SettingsPane /> },
 ];
