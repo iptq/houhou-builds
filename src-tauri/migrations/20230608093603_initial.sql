@@ -1,4 +1,4 @@
-CREATE TABLE [SrsEntrySet] (
+CREATE TABLE IF NOT EXISTS [SrsEntrySet] (
   [ID] integer NOT NULL PRIMARY KEY AUTOINCREMENT, 
   [CreationDate] bigint NOT NULL DEFAULT CURRENT_TIMESTAMP, 
   [NextAnswerDate] bigint, 
@@ -15,4 +15,5 @@ CREATE TABLE [SrsEntrySet] (
   [Tags] [nvarchar(300)], 
   [LastUpdateDate] BIGINT, 
   [IsDeleted] BOOLEAN NOT NULL DEFAULT false, 
-  [ServerId] integer);
+  [ServerId] integer
+);
