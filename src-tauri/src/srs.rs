@@ -122,6 +122,8 @@ fn default_batch_size() -> u32 {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SrsEntry {
+  current_grade: u32,
+  meanings: Vec<String>,
   associated_kanji: String,
 }
 
@@ -136,6 +138,7 @@ pub async fn generate_review_batch(
     r#"
     SELECT * FROM SrsEntrySet
       WHERE AssociatedKanji IS NOT NULL
+        AND CurrentGrade < 8
       ORDER BY RANDOM()
       LIMIT ?
   "#,
@@ -147,8 +150,14 @@ pub async fn generate_review_batch(
 
   let result = result
     .into_iter()
-    .map(|row| SrsEntry {
-      associated_kanji: row.get("AssociatedKanji"),
+    .map(|row| {
+      let meanings: String = row.get("Meanings");
+      let meanings = meanings.split(",").map(|s| s.to_owned()).collect();
+      SrsEntry {
+        current_grade: row.get("CurrentGrade"),
+        meanings,
+        associated_kanji: row.get("AssociatedKanji"),
+      }
     })
     .collect();
 

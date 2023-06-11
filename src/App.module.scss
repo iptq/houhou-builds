@@ -42,12 +42,13 @@ $navLinkColor: hsl(203, 91%, 91%);
   -webkit-user-drag: none;
 
   &:not(.link-active):hover {
-    border-top-color: transparent;
-    background-color: #f4f4f4;
+    border-top-color: #f4f4f4;
+    background: linear-gradient(#f4f4f4, transparent);
   }
 }
 
 .link-active {
   border-top-color: $navLinkAccentColor;
-  background-color: $navLinkColor;
+  // background-color: $navLinkColor;
+  background: linear-gradient($navLinkColor, transparent);
 }
