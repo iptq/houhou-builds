@@ -1,23 +1,36 @@
-import { useState } from "react"
-import { Kanji } from "../types/Kanji"
-import { invoke } from '@tauri-apps/api/tauri'
-import styles from "./KanjiPane.module.scss"
+import { useState } from "react";
+import { Kanji } from "../types/Kanji";
+import { invoke } from "@tauri-apps/api/tauri";
+import useSWR from "swr";
+import styles from "./KanjiPane.module.scss";
+
+interface GetKanjiResult {
+  count: number;
+  kanji: string[];
+}
+
+function KanjiList({ data }: { data : GetKanjiResult}) {
+  return <>
+    Displaying {data.kanji.length} of {data.count} results.
+
+    <ul>
+      {data.kanji.map(kanji => <li key={kanji}>
+        {kanji}
+      </li>)}
+    </ul>
+  </>
+}
 
 export default function KanjiPane() {
-  const [selectedKanji, setSelectedKanji] = useState(null);
+  const { data, error, isLoading } = useSWR("get_kanji", invoke<GetKanjiResult>);
 
-  const fetchKanji = async () => {
-    const result = await invoke('get_kanji');
-    setSelectedKanji(result);
-  };
+  return (
+    <>
+      {JSON.stringify(error)}
 
-  return <>
-    {JSON.stringify(selectedKanji)}
+      <div className={styles.kanjiDisplay}></div>
 
-    <div className={styles.kanjiDisplay}>
-
-    </div>
-
-    <button onClick={fetchKanji}>Fetch</button>
-  </>
+      {data && <KanjiList data={data} />}
+    </>
+  );
 }

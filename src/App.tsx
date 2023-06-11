@@ -1,27 +1,46 @@
-import { RouterProvider, createBrowserRouter } from "react-router-dom";
-import styles from "./App.module.scss"
+import { Link, RouterProvider, createHashRouter } from "react-router-dom";
+import styles from "./App.module.scss";
 import KanjiPane from "./panes/KanjiPane";
 import HomePane from "./panes/HomePane";
+import { createBrowserRouter } from "react-router-dom";
+import { Outlet, Route, createRoutesFromElements } from "react-router";
 
-export default function App() {
-  const router = createBrowserRouter(routes);
-
+function Layout() {
   return (
     <>
       <ul className={styles.header}>
-        <li><a href="/">Home</a></li>
-        <li><a href="/srs">Srs</a></li>
-        <li><a href="/kanji">Kanji</a></li>
-        <li><a href="/vocab">Vocab</a></li>
-        <li><a href="/settings">Settings</a></li>
+        {routes.map((route) => (
+          <li key={route.path}>
+            <Link to={route.path}>{route.title}</Link>
+          </li>
+        ))}
       </ul>
 
-      <RouterProvider router={router} />
+      <Outlet />
     </>
   );
 }
 
+export default function App() {
+  const router = createBrowserRouter(
+    createRoutesFromElements(
+      <Route path="/" element={<Layout />}>
+        {routes.map((route, idx) => (
+          <Route
+            key={route.path}
+            index={idx === 0}
+            path={route.path}
+            element={route.element}
+          />
+        ))}
+      </Route>
+    )
+  );
+
+  return <RouterProvider router={router} />;
+}
+
 const routes = [
-  { path: "/", element: <HomePane /> },
-  { path: "/kanji", element: <KanjiPane /> },
+  { path: "/", title: "Home", element: <HomePane /> },
+  { path: "/kanji", title: "Kanji", element: <KanjiPane /> },
 ];
