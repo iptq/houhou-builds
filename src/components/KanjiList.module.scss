@@ -9,7 +9,15 @@
 .kanji-link {
   padding: 4px 8px;
   border-left: 4px solid transparent;
+  transition: background-color 0.1s ease-out, border-left-color 0.1s ease-out;
+
   user-select: none;
+  -webkit-user-drag: none;
+
+  &:not(.kanji-link-active):hover {
+    border-top-color: transparent;
+    background-color: #f4f4f4;
+  }
 }
 
 .kanji-list-scroll {
@@ -28,4 +36,17 @@
 .kanji-link-active {
   border-left-color: #09c;
   background-color: hsl(203, 91%, 91%);
+}
+
+.loading {
+  padding: 4px 8px;
+  text-align: center;
+}
+
+.result-count {
+  padding: 4px 8px;
+}
+
+.search-container {
+  padding: 4px 8px;
 }

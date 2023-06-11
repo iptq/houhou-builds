@@ -3,9 +3,10 @@ $navLinkColor: hsl(203, 91%, 91%);
 
 .main {
   min-height: 0;
-  display: inline-flex;
+  display: flex;
   flex-direction: column;
-  height: 100%;
+
+  height: 100vh;
 }
 
 .header {
@@ -23,9 +24,8 @@ $navLinkColor: hsl(203, 91%, 91%);
 
 .body {
   min-height: 0;
-  flex-basis: 0px;
   flex-grow: 1;
-  display: inline-flex;
+  display: flex;
 }
 
 .link {

@@ -4,13 +4,54 @@ import { Link } from "react-router-dom";
 import { Badge, Grid, GridItem } from "@chakra-ui/layout";
 import styles from "./KanjiList.module.scss";
 import { Kanji } from "../types/Kanji";
+import { Input, Spinner } from "@chakra-ui/react";
+import { useCallback, useEffect, useState } from "react";
 
 export interface KanjiListProps {
-  data: GetKanjiResult;
+  kanjiList: Kanji[];
+  totalCount: number;
   selectedCharacter?: string;
+  loadMoreKanji: () => void;
 }
 
-export function KanjiList({ data, selectedCharacter }: KanjiListProps) {
+export function KanjiList({
+  kanjiList,
+  totalCount,
+  selectedCharacter,
+  loadMoreKanji,
+}: KanjiListProps) {
+  // Set up intersection observer
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [loadingCanary, setLoadingCanary] = useState(null);
+  const loadingCanaryRef = useCallback(
+    (element) => {
+      if (element) setLoadingCanary(element);
+    },
+    [setLoadingCanary],
+  );
+  useEffect(() => {
+    if (loadingCanary && !isLoadingMore) {
+      const observer = new IntersectionObserver((entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            console.log("loading more shit");
+            loadMoreKanji();
+            setIsLoadingMore(true);
+          }
+        }
+      });
+      observer.observe(loadingCanary);
+
+      return () => {
+        observer.unobserve(loadingCanary);
+      };
+    }
+  }, [loadingCanary, isLoadingMore]);
+
+  useEffect(() => {
+    setIsLoadingMore(false);
+  }, [kanjiList]);
+
   const renderKanjiItem = (kanji: Kanji, active: boolean) => {
     const className = classNames(styles["kanji-link"], active && styles["kanji-link-active"]);
     return (
@@ -21,7 +62,7 @@ export function KanjiList({ data, selectedCharacter }: KanjiListProps) {
           </GridItem>
           <GridItem>{kanji.meanings[0].meaning}</GridItem>
           <GridItem>
-            <Badge>#{kanji.most_used_rank} most used</Badge>
+            <Badge>#{kanji.most_used_rank} common</Badge>
           </GridItem>
         </Grid>
       </Link>
@@ -30,16 +71,24 @@ export function KanjiList({ data, selectedCharacter }: KanjiListProps) {
 
   return (
     <>
-      <small>
-        Displaying {data.kanji.length} of {data.count} results.
+      <div className={styles["search-container"]}>
+        <Input autoFocus placeholder="Search..." />
+      </div>
+
+      <small className={styles["result-count"]}>
+        Displaying {kanjiList.length} of {totalCount} results.
       </small>
 
       <div className={styles["kanji-list-scroll"]}>
         <div className={styles["kanji-list-inner"]}>
-          {data.kanji.map((kanji) => {
+          {kanjiList.map((kanji) => {
             const active = kanji.character == selectedCharacter;
             return renderKanjiItem(kanji, active);
           })}
+
+          <div className={styles.loading} ref={loadingCanaryRef}>
+            <Spinner />
+          </div>
         </div>
       </div>
     </>

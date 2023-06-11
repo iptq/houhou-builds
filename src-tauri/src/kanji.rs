@@ -16,16 +16,23 @@ pub struct GetKanjiOptions {
   #[serde(default)]
   character: Option<String>,
 
+  #[serde(default = "default_skip")]
+  #[derivative(Default(value = "0"))]
+  skip: u32,
+
   #[serde(default = "default_how_many")]
-  #[derivative(Default(value = "10"))]
+  #[derivative(Default(value = "40"))]
   how_many: u32,
 
   #[serde(default)]
   include_srs_info: bool,
 }
 
+fn default_skip() -> u32 {
+  0
+}
 fn default_how_many() -> u32 {
-  10
+  40
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -62,6 +69,7 @@ pub async fn get_kanji(
   options: Option<GetKanjiOptions>,
 ) -> Result<GetKanjiResult, String> {
   let opts = options.unwrap_or_default();
+  println!("opts: {opts:?}");
 
   let looking_for_character_clause = match opts.character {
     None => String::new(),
@@ -80,7 +88,7 @@ pub async fn get_kanji(
         FROM KanjiSet
         WHERE MostUsedRank IS NOT NULL
           {looking_for_character_clause}
-        ORDER BY MostUsedRank LIMIT ?
+        ORDER BY MostUsedRank LIMIT ?, ?
       ) as Kanji
       JOIN KanjiMeaningSet ON Kanji.ID = KanjiMeaningSet.Kanji_ID
       ORDER BY MostUsedRank, KanjiMeaningSet.ID
@@ -94,6 +102,7 @@ pub async fn get_kanji(
   if let Some(character) = &opts.character {
     query = query.bind(character.clone());
   }
+  query = query.bind(opts.skip);
   query = query.bind(opts.how_many);
 
   let result = query

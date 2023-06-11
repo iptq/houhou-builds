@@ -60,7 +60,12 @@ export default function App() {
             });
           } else {
             return (
-              <Route key={`route-${route.key}`} index={idx == 0} path={route.path} element={route.element} />
+              <Route
+                key={`route-${route.key}`}
+                index={idx == 0}
+                path={route.path}
+                element={route.element}
+              />
             );
           }
         })}
@@ -84,7 +89,7 @@ const navLinks = [
     title: "SRS",
     element: <SrsPane />,
     subPaths: [
-      { key: "index", path: "/srs" },
+      { key: "index", path: "/" },
       { key: "review", path: "/srs/review", element: <SrsReviewPane /> },
     ],
   },
