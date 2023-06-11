@@ -18,14 +18,16 @@ function Layout() {
   return (
     <main className={styles.main}>
       <ul className={styles.header}>
-        {routes.map((route) => {
-          if (!route.title) return undefined;
-          const active = matchPath({ path: route.path }, location.pathname);
+        {navLinks.map((navLink) => {
+          const active = (
+            navLink.subPaths ? navLink.subPaths : [{ key: navLink.key, path: navLink.path }]
+          ).some((item) => matchPath({ path: item.path }, location.pathname));
+          const mainPath = navLink.subPaths ? navLink.subPaths[0].path : navLink.path;
           const className = classNames(styles.link, active && styles["link-active"]);
           return (
-            <li key={route.path}>
-              <Link to={route.path} className={className}>
-                {route.title}
+            <li key={navLink.path}>
+              <Link to={mainPath} className={className}>
+                {navLink.title}
               </Link>
             </li>
           );
@@ -41,9 +43,23 @@ export default function App() {
   const router = createBrowserRouter(
     createRoutesFromElements(
       <Route path="/" element={<Layout />}>
-        {routes.map((route, idx) => (
-          <Route key={route.path} index={idx === 0} path={route.path} element={route.element} />
-        ))}
+        {navLinks.flatMap((route, idx) => {
+          if (route.subPaths) {
+            return route.subPaths.map((subRoute, idx) => {
+              return (
+                <Route
+                  key={`${route.key}-${subRoute.key}`}
+                  path={subRoute.path}
+                  element={route.element}
+                />
+              );
+            });
+          } else {
+            return (
+              <Route key={route.path} index={idx === 0} path={route.path} element={route.element} />
+            );
+          }
+        })}
       </Route>,
     ),
   );
@@ -57,11 +73,18 @@ export default function App() {
   );
 }
 
-const routes = [
+const navLinks = [
   { key: "home", path: "/", title: "Home", element: <HomePane /> },
   { key: "srs", path: "/srs", title: "SRS", element: <SrsPane /> },
-  { key: "kanji", path: "/kanji", title: "Kanji", element: <KanjiPane /> },
-  { key: "kanjiSelected", path: "/kanji/:selectedKanji", element: <KanjiPane /> },
+  {
+    key: "kanji",
+    title: "Kanji",
+    element: <KanjiPane />,
+    subPaths: [
+      { key: "index", path: "/kanji" },
+      { key: "selected", path: "/kanji/:selectedKanji" },
+    ],
+  },
   { key: "vocab", path: "/vocab", title: "Vocab", element: <VocabPane /> },
   { key: "settings", path: "/settings", title: "Settings", element: <SettingsPane /> },
 ];

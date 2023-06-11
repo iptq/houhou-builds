@@ -9,14 +9,23 @@ main.main {
   justify-content: space-evenly;
 
   list-style-type: none;
+
+  li {
+    flex-basis: 0;
+    flex-grow: 1;
+  }
 }
 
 .link {
-  flex-grow: 1;
   display: inline-block;
+  width: 100%;
+  text-align: center;
   padding: 12px;
+  border-top: 4px solid transparent;
+  user-select: none;
 }
 
 .link-active {
-  background-color: skyblue;
+  border-top-color: #09c;
+  background-color: lightskyblue;
 }
