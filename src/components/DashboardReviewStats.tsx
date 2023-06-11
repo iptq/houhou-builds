@@ -8,12 +8,14 @@ import {
   StatHelpText,
   StatLabel,
   StatNumber,
+  Tooltip,
 } from "@chakra-ui/react";
 import { ArrowRightIcon } from "@chakra-ui/icons";
 import styles from "./DashboardReviewStats.module.scss";
 import useSWR from "swr";
 import { invoke } from "@tauri-apps/api/tauri";
 import { Link } from "react-router-dom";
+import ConditionalWrapper from "../lib/ConditionalWrapper";
 
 interface SrsStats {
   reviews_available: number;
@@ -42,8 +44,10 @@ export default function DashboardReviewStats() {
       </>
     );
 
-  const averageSuccess = srsStats.num_success / (srsStats.num_success + srsStats.num_failure);
+  const averageSuccess = srsStats.num_success / ((srsStats.num_success + srsStats.num_failure) || 1);
   const averageSuccessStr = `${Math.round(averageSuccess * 10000) / 100}%`;
+
+  const canReview = srsStats.reviews_available == 0;
 
   const generateStat = (stat) => {
     return (
@@ -63,11 +67,13 @@ export default function DashboardReviewStats() {
           <Stat>
             <StatLabel>reviews available</StatLabel>
             <StatNumber>{srsStats.reviews_available}</StatNumber>
-            <Link to="/srs/review">
-              <Button disabled={srsStats.reviews_available == 0} colorScheme="blue">
-                Start reviewing <ArrowRightIcon marginLeft={3} />
-              </Button>
-            </Link>
+            <ConditionalWrapper condition={canReview} wrapper={children => <Tooltip label="Add items to start reviewing">{children}</Tooltip>}>
+              <Link to="/srs/review">
+                <Button isDisabled={canReview} colorScheme="blue">
+                  Start reviewing <ArrowRightIcon marginLeft={3} />
+                </Button>
+              </Link>
+            </ConditionalWrapper>
           </Stat>
         </GridItem>
 

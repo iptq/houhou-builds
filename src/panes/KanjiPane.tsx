@@ -39,7 +39,7 @@ function KanjiList({ data, selectedCharacter }: KanjiListProps) {
                 <GridItem rowSpan={2} style={{ fontSize: "24px", textAlign: "center" }}>
                   {kanji.character}
                 </GridItem>
-                <GridItem>{kanji.meaning}</GridItem>
+                <GridItem>{kanji.meanings[0].meaning}</GridItem>
                 <GridItem>
                   <small>
                     #{kanji.most_used_rank} most used

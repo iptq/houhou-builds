@@ -3,8 +3,8 @@ import { GetKanjiResult } from "../panes/KanjiPane";
 import { Kanji } from "../types/Kanji";
 import styles from "./KanjiDisplay.module.scss";
 import useSWR from "swr";
-
-type GetSingleKanjiResult = Kanji;
+import { Button } from "@chakra-ui/button";
+import { AddIcon } from "@chakra-ui/icons";
 
 interface KanjiDisplayProps {
   kanjiCharacter: string;
@@ -12,20 +12,33 @@ interface KanjiDisplayProps {
 
 export default function KanjiDisplay({ kanjiCharacter }: KanjiDisplayProps) {
   const {
-    data: kanji,
+    data: kanjiResult,
     error,
     isLoading,
-  } = useSWR(["get_single_kanji", kanjiCharacter], ([command, character]) =>
-    invoke<GetSingleKanjiResult>(command, { character }),
+  } = useSWR(["get_kanji", kanjiCharacter], ([command, character]) =>
+    invoke<GetKanjiResult>(command, { options: { character } }),
   );
 
-  if (!kanji) return <>Loading...</>;
+  if (!kanjiResult || !kanjiResult.kanji) return <>
+    {JSON.stringify([kanjiResult, error, isLoading])}
+    Loading...
+  </>;
+
+  const kanji = kanjiResult.kanji[0];
+
+  const addSrsItem = () => {
+
+  };
 
   return (
     <>
       <div className={styles.display}>{kanji.character}</div>
 
-      {kanji.meaning}
+      {kanji.meanings.map(m => m.meaning).join(", ")}
+
+      <Button onClick={addSrsItem} colorScheme="green">
+        <AddIcon /> Add to SRS
+      </Button>
     </>
   );
 }

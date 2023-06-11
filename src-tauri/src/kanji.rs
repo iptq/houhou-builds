@@ -1,4 +1,4 @@
-use sqlx::{sqlite::SqliteRow, Row, SqlitePool};
+use sqlx::{sqlite::SqliteRow, Encode, Row, SqlitePool, Type};
 use tauri::State;
 
 pub struct KanjiDb(pub SqlitePool);
@@ -7,15 +7,28 @@ pub struct KanjiDb(pub SqlitePool);
 #[derivative(Default)]
 pub struct GetKanjiOptions {
   #[serde(default)]
+  character: Option<String>,
+
+  #[serde(default = "default_how_many")]
   #[derivative(Default(value = "10"))]
   how_many: u32,
+}
+
+fn default_how_many() -> u32 {
+  10
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Kanji {
   character: String,
-  meaning: String,
   most_used_rank: u32,
+  meanings: Vec<KanjiMeaning>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct KanjiMeaning {
+  id: u32,
+  meaning: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -24,73 +37,97 @@ pub struct GetKanjiResult {
   kanji: Vec<Kanji>,
 }
 
-impl Kanji {
-  fn from_sqlite_row(row: SqliteRow) -> Self {
-    let character = row.get("Character");
-    let meaning = row.get("Meaning");
-    let most_used_rank = row.get("MostUsedRank");
-
-    Kanji {
-      character,
-      meaning,
-      most_used_rank,
-    }
-  }
-}
-
 #[tauri::command]
 pub async fn get_kanji(
   db: State<'_, KanjiDb>,
   options: Option<GetKanjiOptions>,
-) -> Result<GetKanjiResult, ()> {
+) -> Result<GetKanjiResult, String> {
   let opts = options.unwrap_or_default();
+  println!("Options: {:?}", opts);
 
-  let result = sqlx::query(
+  let looking_for_character_clause = match opts.character {
+    None => String::new(),
+    Some(_) => format!(" AND KanjiSet.Character = ?"),
+  };
+
+  let query_string = format!(
     r#"
-      SELECT * FROM KanjiSet
-        LEFT JOIN KanjiMeaningSet ON KanjiSet.ID = KanjiMeaningSet.Kanji_ID
-        GROUP BY KanjiSet.ID
-        HAVING MostUsedRank IS NOT NULL
-        ORDER BY MostUsedRank 
-        LIMIT ?
+      SELECT *, KanjiMeaningSet.ID as KanjiMeaningID
+      FROM (
+        SELECT *
+        FROM KanjiSet
+        WHERE MostUsedRank IS NOT NULL
+          {looking_for_character_clause}
+        ORDER BY MostUsedRank LIMIT ?
+      ) as Kanji
+      JOIN KanjiMeaningSet ON Kanji.ID = KanjiMeaningSet.Kanji_ID
+      ORDER BY MostUsedRank, KanjiMeaningSet.ID
     "#,
-  )
-  .bind(opts.how_many)
-  .fetch_all(&db.0)
-  .await
-  .map_err(|_| ())?;
+  );
 
-  let kanji = result.into_iter().map(Kanji::from_sqlite_row).collect();
+  let mut query = sqlx::query(&query_string);
+
+  // Do all the binds
+
+  if let Some(character) = opts.character {
+    println!("Bind {}", character);
+    query = query.bind(character);
+  }
+
+  println!("Bind {}", opts.how_many);
+  query = query.bind(opts.how_many);
+
+  println!("Query: {query_string}");
+
+  let result = query
+    .fetch_all(&db.0)
+    .await
+    .map_err(|err| err.to_string())?;
+
+  let kanji = {
+    let mut new_vec: Vec<Kanji> = Vec::with_capacity(result.len());
+    let mut last_character: Option<String> = None;
+
+    for row in result {
+      let character: String = row.get("Character");
+      let most_used_rank = row.get("MostUsedRank");
+
+      let meaning = KanjiMeaning {
+        id: row.get("KanjiMeaningID"),
+        meaning: row.get("Meaning"),
+      };
+
+      let same_as = match last_character {
+        Some(ref last_character) if character == *last_character => {
+          Some(new_vec.last_mut().unwrap())
+        }
+        Some(_) => None,
+        None => None,
+      };
+
+      last_character = Some(character.clone());
+
+      if let Some(kanji) = same_as {
+        kanji.meanings.push(meaning);
+      } else {
+        new_vec.push(Kanji {
+          character,
+          most_used_rank,
+          meanings: vec![meaning],
+        });
+      }
+    }
+
+    new_vec
+  };
+
+  println!("Result: {kanji:?}");
 
   let count = sqlx::query("SELECT COUNT(*) FROM KanjiSet")
     .fetch_one(&db.0)
     .await
-    .map_err(|_| ())?;
-  let count = count.try_get(0).map_err(|_| ())?;
+    .map_err(|err| err.to_string())?;
+  let count = count.try_get(0).map_err(|err| err.to_string())?;
 
   Ok(GetKanjiResult { kanji, count })
-}
-
-#[tauri::command]
-pub async fn get_single_kanji(
-  db: State<'_, KanjiDb>,
-  character: String,
-) -> Result<Option<Kanji>, ()> {
-  let result = sqlx::query(
-    r#"
-      SELECT * FROM KanjiSet
-        LEFT JOIN KanjiMeaningSet ON KanjiSet.ID = KanjiMeaningSet.Kanji_ID
-        GROUP BY KanjiSet.ID
-        HAVING MostUsedRank IS NOT NULL
-          AND KanjiSet.Character = ?
-    "#,
-  )
-  .bind(character)
-  .fetch_one(&db.0)
-  .await
-  .map_err(|_| ())?;
-
-  let kanji = Kanji::from_sqlite_row(result);
-
-  Ok(Some(kanji))
 }

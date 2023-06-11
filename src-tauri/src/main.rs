@@ -62,7 +62,6 @@ async fn main() -> Result<()> {
     .invoke_handler(tauri::generate_handler![
       srs::get_srs_stats,
       kanji::get_kanji,
-      kanji::get_single_kanji
     ])
     .on_window_event(|event| match event.event() {
       WindowEvent::CloseRequested { api, .. } => {
