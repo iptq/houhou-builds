@@ -1,3 +1,5 @@
+pub mod kradfile;
+
 use std::{path::PathBuf, str::FromStr};
 
 use anyhow::Result;
@@ -25,6 +27,9 @@ async fn main() -> Result<()> {
 
   // Migrate that shit
   sqlx::migrate!().run(&pool).await?;
+
+  // Kradfile
+  kradfile::process_kradfile(&pool, opt.in_dir.join("kradfile.utf8")).await?;
 
   println!("Hello, world!");
 
