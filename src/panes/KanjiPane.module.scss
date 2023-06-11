@@ -8,3 +8,10 @@
   padding: 4px 8px;
   border: 1px solid lightgray;
 }
+
+.kanji-list-scroll {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: scroll;
+}

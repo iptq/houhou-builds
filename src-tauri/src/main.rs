@@ -11,10 +11,7 @@ mod kanji;
 use std::str::FromStr;
 
 use anyhow::{Context, Result};
-use sqlx::{
-  sqlite::{SqliteConnectOptions, SqlitePoolOptions},
-  SqlitePool,
-};
+use sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions};
 use tauri::SystemTray;
 
 use crate::kanji::KanjiDb;

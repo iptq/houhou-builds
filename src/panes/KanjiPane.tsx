@@ -20,22 +20,27 @@ interface KanjiListProps {
 function KanjiList({ data, selectedCharacter }: KanjiListProps) {
   return (
     <>
-      Displaying {data.kanji.length} of {data.count} results.
-      {data.kanji.map((kanji) => (
-        <Link
-          key={kanji.character}
-          className={styles["kanji-link"]}
-          to={`/kanji/${kanji.character}`}
-        >
-          <Grid templateRows="repeat(2, 1fr)" templateColumns="1fr 3fr">
-            <GridItem rowSpan={2} style={{ fontSize: "24px", textAlign: "center" }}>
-              {kanji.character}
-            </GridItem>
-            <GridItem>{kanji.meaning}</GridItem>
-            <GridItem>#{kanji.most_used_rank} most used</GridItem>
-          </Grid>
-        </Link>
-      ))}
+      <small>
+        Displaying {data.kanji.length} of {data.count} results.
+      </small>
+
+      <div className={styles["kanji-list-scroll"]}>
+        {data.kanji.map((kanji) => (
+          <Link
+            key={kanji.character}
+            className={styles["kanji-link"]}
+            to={`/kanji/${kanji.character}`}
+          >
+            <Grid templateRows="repeat(2, 1fr)" templateColumns="1fr 3fr">
+              <GridItem rowSpan={2} style={{ fontSize: "24px", textAlign: "center" }}>
+                {kanji.character}
+              </GridItem>
+              <GridItem>{kanji.meaning}</GridItem>
+              <GridItem>#{kanji.most_used_rank} most used</GridItem>
+            </Grid>
+          </Link>
+        ))}
+      </div>
     </>
   );
 }
@@ -46,9 +51,6 @@ export default function KanjiPane() {
 
   return (
     <>
-      {JSON.stringify(error)}
-      {JSON.stringify(selectedKanji)}
-
       <Stack spacing={7} direction="row">
         <Box p={2} className={styles["kanji-list"]}>
           {data && <KanjiList data={data} selectedCharacter={selectedKanji} />}

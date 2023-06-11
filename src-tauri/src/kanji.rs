@@ -24,14 +24,16 @@ pub struct GetKanjiResult {
   kanji: Vec<Kanji>,
 }
 
-fn build_kanji(row: SqliteRow) -> Kanji {
-  let character = row.get("Character");
-  let meaning = row.get("Meaning");
-  let most_used_rank = row.get("MostUsedRank");
-  Kanji {
-    character,
-    meaning,
-    most_used_rank,
+impl Kanji {
+  fn from_sqlite_row(row: SqliteRow) -> Self {
+    let character = row.get("Character");
+    let meaning = row.get("Meaning");
+    let most_used_rank = row.get("MostUsedRank");
+    Kanji {
+      character,
+      meaning,
+      most_used_rank,
+    }
   }
 }
 
@@ -57,7 +59,7 @@ pub async fn get_kanji(
   .await
   .map_err(|_| ())?;
 
-  let kanji = result.into_iter().map(build_kanji).collect();
+  let kanji = result.into_iter().map(Kanji::from_sqlite_row).collect();
 
   let count = sqlx::query("SELECT COUNT(*) FROM KanjiSet")
     .fetch_one(&db.0)
@@ -79,7 +81,7 @@ pub async fn get_single_kanji(
         LEFT JOIN KanjiMeaningSet ON KanjiSet.ID = KanjiMeaningSet.Kanji_ID
         GROUP BY KanjiSet.ID
         HAVING MostUsedRank IS NOT NULL
-          AND Kanji.Character = ?
+          AND KanjiSet.Character = ?
     "#,
   )
   .bind(character)
@@ -87,5 +89,7 @@ pub async fn get_single_kanji(
   .await
   .map_err(|_| ())?;
 
-  Ok(Some(build_kanji(result)))
+  let kanji = Kanji::from_sqlite_row(result);
+
+  Ok(Some(kanji))
 }
