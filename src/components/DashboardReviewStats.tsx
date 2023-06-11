@@ -1,4 +1,5 @@
 import {
+  Button,
   Grid,
   GridItem,
   Stat,
@@ -8,9 +9,11 @@ import {
   StatLabel,
   StatNumber,
 } from "@chakra-ui/react";
+import { ArrowRightIcon } from "@chakra-ui/icons";
 import styles from "./DashboardReviewStats.module.scss";
 import useSWR from "swr";
 import { invoke } from "@tauri-apps/api/tauri";
+import { Link } from "react-router-dom";
 
 interface SrsStats {
   reviews_available: number;
@@ -31,28 +34,48 @@ export default function DashboardReviewStats() {
     isLoading,
   } = useSWR(["get_srs_stats"], ([command]) => invoke<SrsStats>(command));
 
-  if (!srsStats) return <>Loading...</>;
+  if (!srsStats)
+    return (
+      <>
+        {JSON.stringify([srsStats, error, isLoading])}
+        Loading...
+      </>
+    );
 
   const averageSuccess = srsStats.num_success / (srsStats.num_success + srsStats.num_failure);
   const averageSuccessStr = `${Math.round(averageSuccess * 10000) / 100}%`;
 
   const generateStat = (stat) => {
     return (
-      <Stat>
-        <StatLabel>{stat.label}</StatLabel>
-        <StatNumber>{stat.value}</StatNumber>
-      </Stat>
+      <GridItem>
+        <Stat>
+          <StatLabel>{stat.label}</StatLabel>
+          <StatNumber>{stat.value}</StatNumber>
+        </Stat>
+      </GridItem>
     );
   };
 
   return (
     <>
-      {/* JSON.stringify([srsStats, error, isLoading]) */}
+      <Grid templateColumns="2fr 1fr 1fr" templateRows="1fr 1fr">
+        <GridItem rowSpan={2}>
+          <Stat>
+            <StatLabel>reviews available</StatLabel>
+            <StatNumber>{srsStats.reviews_available}</StatNumber>
+            <Link to="/srs/review">
+              <Button disabled={srsStats.reviews_available == 0} colorScheme="blue">
+                Start reviewing <ArrowRightIcon marginLeft={3} />
+              </Button>
+            </Link>
+          </Stat>
+        </GridItem>
 
-      <StatGroup>
+        {generateStat({ label: "reviews available", value: srsStats.reviews_available })}
+        {generateStat({ label: "reviews today", value: srsStats.reviews_today })}
         {generateStat({ label: "total items", value: srsStats.total_items })}
         {generateStat({ label: "average success", value: averageSuccessStr })}
-      </StatGroup>
+      </Grid>
     </>
   );
 }

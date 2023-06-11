@@ -11,6 +11,7 @@ import SettingsPane from "./panes/SettingsPane";
 import { StrictMode } from "react";
 
 import styles from "./App.module.scss";
+import SrsReviewPane from "./panes/SrsReviewPane";
 
 function Layout() {
   const location = useLocation();
@@ -45,18 +46,19 @@ export default function App() {
       <Route path="/" element={<Layout />}>
         {navLinks.flatMap((route, idx) => {
           if (route.subPaths) {
-            return route.subPaths.map((subRoute, idx) => {
+            return route.subPaths.map((subRoute, idx2) => {
               return (
                 <Route
                   key={`${route.key}-${subRoute.key}`}
+                  index={idx + idx2 == 0}
                   path={subRoute.path}
-                  element={route.element}
+                  element={subRoute.element ?? route.element}
                 />
               );
             });
           } else {
             return (
-              <Route key={route.path} index={idx === 0} path={route.path} element={route.element} />
+              <Route key={route.path} index={idx == 0} path={route.path} element={route.element} />
             );
           }
         })}
@@ -74,8 +76,16 @@ export default function App() {
 }
 
 const navLinks = [
-  { key: "home", path: "/", title: "Home", element: <HomePane /> },
-  { key: "srs", path: "/srs", title: "SRS", element: <SrsPane /> },
+  // { key: "home", path: "/", title: "Home", element: <HomePane /> },
+  {
+    key: "srs",
+    title: "SRS",
+    element: <SrsPane />,
+    subPaths: [
+      { key: "index", path: "/srs" },
+      { key: "review", path: "/srs/review", element: <SrsReviewPane /> },
+    ],
+  },
   {
     key: "kanji",
     title: "Kanji",
