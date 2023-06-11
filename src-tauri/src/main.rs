@@ -63,6 +63,7 @@ async fn main() -> Result<()> {
     .invoke_handler(tauri::generate_handler![
       srs::get_srs_stats,
       srs::add_srs_item,
+      srs::generate_review_batch,
       kanji::get_kanji,
     ])
     .on_window_event(|event| match event.event() {

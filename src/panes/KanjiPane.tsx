@@ -41,7 +41,7 @@ export default function KanjiPane() {
   };
 
   return (
-    <Flex gap={3} className={styles["kanji-pane-container"]}>
+    <Flex className={styles["kanji-pane-container"]}>
       <Box className={styles["kanji-pane-list"]}>
         {kanjiList && (
           <KanjiList

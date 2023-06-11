@@ -66,31 +66,28 @@ export default function DashboardReviewStats() {
   };
 
   return (
-    <>
-      <Grid templateColumns="2fr 1fr 1fr" templateRows="1fr 1fr">
-        <GridItem rowSpan={2}>
-          <Stat>
-            <StatLabel>reviews available</StatLabel>
-            <StatNumber>{srsStats.reviews_available}</StatNumber>
-            <ConditionalWrapper
-              condition={canReview}
-              wrapper={(children) => (
-                <Tooltip label="Add items to start reviewing">{children}</Tooltip>
-              )}
-              elseWrapper={(children) => <Link to="/srs/review">{children}</Link>}
-            >
-              <Button isDisabled={canReview} colorScheme="blue">
-                Start reviewing <ArrowRightIcon marginLeft={3} />
-              </Button>
-            </ConditionalWrapper>
-          </Stat>
-        </GridItem>
+    <Grid templateColumns="2fr 1fr 1fr" templateRows="1fr 1fr" gap={4}>
+      <GridItem rowSpan={2} className={styles["reviews-available"]}>
+        <Stat>
+          <StatLabel>reviews available</StatLabel>
+          <StatNumber>{srsStats.reviews_available}</StatNumber>
+        </Stat>
 
-        {generateStat({ label: "reviews available", value: srsStats.reviews_available })}
-        {generateStat({ label: "reviews today", value: srsStats.reviews_today })}
-        {generateStat({ label: "total items", value: srsStats.total_items })}
-        {generateStat({ label: "average success", value: averageSuccessStr })}
-      </Grid>
-    </>
+        <ConditionalWrapper
+          condition={canReview}
+          wrapper={(children) => <Tooltip label="Add items to start reviewing">{children}</Tooltip>}
+          elseWrapper={(children) => <Link to="/srs/review">{children}</Link>}
+        >
+          <Button isDisabled={canReview} colorScheme="blue">
+            Start reviewing <ArrowRightIcon marginLeft={3} />
+          </Button>
+        </ConditionalWrapper>
+      </GridItem>
+
+      {generateStat({ label: "reviews available", value: srsStats.reviews_available })}
+      {generateStat({ label: "reviews today", value: srsStats.reviews_today })}
+      {generateStat({ label: "total items", value: srsStats.total_items })}
+      {generateStat({ label: "average success", value: averageSuccessStr })}
+    </Grid>
   );
 }

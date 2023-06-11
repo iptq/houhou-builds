@@ -8,6 +8,7 @@ import { Button } from "@chakra-ui/button";
 import { AddIcon } from "@chakra-ui/icons";
 import SelectOnClick from "../lib/SelectOnClick";
 import { Alert, AlertIcon } from "@chakra-ui/alert";
+import { isValid } from "date-fns";
 
 interface KanjiDisplayProps {
   kanjiCharacter: string;
@@ -51,10 +52,14 @@ export default function KanjiDisplay({ kanjiCharacter }: KanjiDisplayProps) {
     const nextAnswerDate = new Date(kanji.srs_info.next_answer_date);
     srsPart = (
       <Alert status="info">
-        <AlertIcon /> <p>This character is being tracked in SRS!</p>
-        <p>
-          (Next test: <TimeAgo date={nextAnswerDate} />)
-        </p>
+        <AlertIcon />
+        <p>This character is being tracked in SRS!</p>
+
+        {isValid(nextAnswerDate) && (
+          <p>
+            (Due: <TimeAgo date={nextAnswerDate} />)
+          </p>
+        )}
       </Alert>
     );
   }

@@ -107,3 +107,50 @@ pub async fn add_srs_item(
 
   Ok(())
 }
+
+#[derive(Debug, Derivative, Serialize, Deserialize)]
+#[derivative(Default)]
+pub struct GenerateReviewBatchOptions {
+  #[serde(default = "default_batch_size")]
+  #[derivative(Default(value = "10"))]
+  batch_size: u32,
+}
+
+fn default_batch_size() -> u32 {
+  10
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct SrsEntry {
+  associated_kanji: String,
+}
+
+#[tauri::command]
+pub async fn generate_review_batch(
+  srs_db: State<'_, SrsDb>,
+  options: Option<GenerateReviewBatchOptions>,
+) -> Result<Vec<SrsEntry>, String> {
+  let opts = options.unwrap_or_default();
+
+  let result = sqlx::query(
+    r#"
+    SELECT * FROM SrsEntrySet
+      WHERE AssociatedKanji IS NOT NULL
+      ORDER BY RANDOM()
+      LIMIT ?
+  "#,
+  )
+  .bind(opts.batch_size)
+  .fetch_all(&srs_db.0)
+  .await
+  .map_err(|err| err.to_string())?;
+
+  let result = result
+    .into_iter()
+    .map(|row| SrsEntry {
+      associated_kanji: row.get("AssociatedKanji"),
+    })
+    .collect();
+
+  Ok(result)
+}

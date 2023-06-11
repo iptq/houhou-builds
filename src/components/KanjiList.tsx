@@ -22,9 +22,9 @@ export function KanjiList({
 }: KanjiListProps) {
   // Set up intersection observer
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [loadingCanary, setLoadingCanary] = useState(null);
+  const [loadingCanary, setLoadingCanary] = useState<HTMLDivElement | null>(null);
   const loadingCanaryRef = useCallback(
-    (element) => {
+    (element: HTMLDivElement) => {
       if (element) setLoadingCanary(element);
     },
     [setLoadingCanary],

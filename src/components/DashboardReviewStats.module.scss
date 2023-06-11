@@ -1,7 +1,10 @@
-.top-row {
-}
-
 .reviews-stats {
   background-color: gray;
   color: white;
+}
+
+.reviews-available {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
 }
