@@ -1,21 +1,10 @@
-import {
-  Button,
-  Grid,
-  GridItem,
-  Stat,
-  StatArrow,
-  StatGroup,
-  StatHelpText,
-  StatLabel,
-  StatNumber,
-  Tooltip,
-} from "@chakra-ui/react";
+import { Button, Grid, GridItem, Stat, StatLabel, StatNumber, Tooltip } from "@chakra-ui/react";
 import { ArrowRightIcon } from "@chakra-ui/icons";
 import styles from "./DashboardReviewStats.module.scss";
 import useSWR from "swr";
 import { invoke } from "@tauri-apps/api/tauri";
 import { Link } from "react-router-dom";
-import ConditionalWrapper from "../lib/ConditionalWrapper";
+import ConditionalWrapper from "./utils/ConditionalWrapper";
 
 interface SrsStats {
   reviews_available: number;

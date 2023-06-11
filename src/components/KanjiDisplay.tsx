@@ -1,12 +1,11 @@
 import { invoke } from "@tauri-apps/api/tauri";
 import { GetKanjiResult } from "../panes/KanjiPane";
-import { Kanji } from "../types/Kanji";
 import TimeAgo from "react-timeago";
 import styles from "./KanjiDisplay.module.scss";
 import useSWR from "swr";
 import { Button } from "@chakra-ui/button";
 import { AddIcon } from "@chakra-ui/icons";
-import SelectOnClick from "../lib/SelectOnClick";
+import SelectOnClick from "./utils/SelectOnClick";
 import { Alert, AlertIcon } from "@chakra-ui/alert";
 import { isValid } from "date-fns";
 

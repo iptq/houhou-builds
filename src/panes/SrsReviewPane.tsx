@@ -3,6 +3,7 @@ import {
   Container,
   Input,
   InputGroup,
+  InputLeftElement,
   InputRightElement,
   Progress,
   Spinner,
@@ -14,8 +15,9 @@ import { invoke } from "@tauri-apps/api/tauri";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowBackIcon, CheckIcon } from "@chakra-ui/icons";
 import { FormEvent } from "react";
-import ConfirmQuitModal from "../lib/ConfirmQuitModal";
+import ConfirmQuitModal from "../components/utils/ConfirmQuitModal";
 import * as _ from "lodash-es";
+import InputBox from "../components/utils/InputBox";
 
 export interface SrsEntry {
   associated_kanji: string;
@@ -25,8 +27,8 @@ export interface SrsEntry {
 }
 
 export enum ReviewItemType {
-  MEANING,
-  READING,
+  MEANING = "MEANING",
+  READING = "READING",
 }
 
 export interface ReviewItem {
@@ -100,14 +102,37 @@ export function Component() {
     setReviewQueue(rest);
   };
 
+  if (!reviewQueue) return <Spinner />;
+  if (reviewQueue.length == 0) return <Done />;
+  const nextItem = reviewQueue[0];
+
+  const inputBox = (kanaInput: boolean) => {
+    return (
+      <InputGroup>
+        <InputLeftElement>{kanaInput ? "あ" : "A"}</InputLeftElement>
+
+        <InputBox
+          kanaInput={kanaInput}
+          value={currentAnswer}
+          setValue={setCurrentAnswer}
+          autoFocus
+          className={styles["input-box"]}
+          placeholder="Enter your answer..."
+          spellCheck={false}
+          backgroundColor={"white"}
+        />
+
+        <InputRightElement>
+          <CheckIcon color="green.500" />
+        </InputRightElement>
+      </InputGroup>
+    );
+  };
+
   const renderInside = () => {
-    if (!reviewQueue) return <Spinner />;
-
-    if (reviewQueue.length == 0) return <Done />;
-
-    const nextItem = reviewQueue[0];
-
     console.log("next item", nextItem);
+
+    const kanaInput = nextItem.type == ReviewItemType.READING;
 
     return (
       <>
@@ -123,27 +148,15 @@ export function Component() {
 
         <h1 className={styles["test-word"]}>{nextItem.challenge}</h1>
 
-        <details>
-          <summary>Debug</summary>
-          <pre>{JSON.stringify(nextItem, null, 2)}</pre>
-        </details>
-
         <form onSubmit={formSubmit}>
-          <InputGroup>
-            <Input
-              autoFocus
-              className={styles["input-box"]}
-              placeholder="Enter your answer..."
-              value={currentAnswer}
-              spellCheck={false}
-              backgroundColor={"white"}
-              onChange={(evt) => setCurrentAnswer(evt.target.value)}
-            />
+          {
+            {
+              [ReviewItemType.MEANING]: "What is the meaning?",
+              [ReviewItemType.READING]: "What is the reading?",
+            }[nextItem.type]
+          }
 
-            <InputRightElement>
-              <CheckIcon color="green.500" />
-            </InputRightElement>
-          </InputGroup>
+          {inputBox(kanaInput)}
         </form>
       </>
     );
@@ -164,6 +177,12 @@ export function Component() {
           <ArrowBackIcon />
           Back
         </Button>
+
+        <details>
+          <summary>Debug</summary>
+          <pre>{JSON.stringify(nextItem, null, 2)}</pre>
+        </details>
+
         <div className={styles.container}>{renderInside()}</div>
       </Container>
 
