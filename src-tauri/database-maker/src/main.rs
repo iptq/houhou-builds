@@ -31,7 +31,5 @@ async fn main() -> Result<()> {
   // Kradfile
   kradfile::process_kradfile(&pool, opt.in_dir.join("kradfile.utf8")).await?;
 
-  println!("Hello, world!");
-
   Ok(())
 }

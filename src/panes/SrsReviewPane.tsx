@@ -85,7 +85,9 @@ export function Component() {
     const isCorrect = possibleAnswers.has(currentAnswer);
 
     // Update the backend
-    await invoke("update_srs_item", { item_id: nextItem.associatedId, correct: isCorrect });
+    const params = { itemId: nextItem.associatedId, correct: isCorrect };
+    const result = await invoke("update_srs_item", params);
+    console.log("result", result);
 
     // Check the answer
     if (!isCorrect) {

@@ -3,7 +3,7 @@ use std::time::Duration;
 use sqlx::{Row, SqlitePool};
 use tauri::State;
 
-use crate::utils::Ticks;
+use crate::{kanji::KanjiDb, utils::Ticks};
 
 pub struct SrsDb(pub SqlitePool);
 
@@ -78,10 +78,48 @@ pub struct AddSrsItemOptions {
 
 #[tauri::command]
 pub async fn add_srs_item(
-  db: State<'_, SrsDb>,
-  options: Option<AddSrsItemOptions>,
+  kanji_db: State<'_, KanjiDb>,
+  srs_db: State<'_, SrsDb>,
+  options: AddSrsItemOptions,
 ) -> Result<(), String> {
-  let opts = options.unwrap_or_default();
+  // Fetch meanings
+  let rows = sqlx::query(
+    r#"
+    SELECT Meaning
+    FROM KanjiMeaningSet
+    JOIN KanjiSet ON KanjiMeaningSet.Kanji_ID = KanjiSet.ID
+    WHERE KanjiSet.Character = ?
+    "#,
+  )
+  .bind(&options.character)
+  .fetch_all(&kanji_db.0)
+  .await
+  .map_err(|err| err.to_string())?;
+  let meanings = rows
+    .into_iter()
+    .map(|row| row.get::<String, _>("Meaning").to_owned())
+    .collect::<Vec<_>>();
+  let meanings = meanings.join(",");
+  println!("meanings: {:?}", meanings);
+
+  // Fetch readings
+  let row = sqlx::query(
+    "SELECT OnYomi, KunYomi, Nanori FROM KanjiSet WHERE Character = ?",
+  )
+  .bind(&options.character)
+  .fetch_one(&kanji_db.0)
+  .await
+  .map_err(|err| err.to_string())?;
+  let onyomi_reading: String = row.get("OnYomi");
+  let kunyomi_reading: String = row.get("KunYomi");
+  let nanori_reading: String = row.get("Nanori");
+  let readings = onyomi_reading
+    .split(",")
+    .chain(kunyomi_reading.split(","))
+    .chain(nanori_reading.split(","))
+    .collect::<Vec<_>>();
+  let readings = readings.join(",");
+  println!("readings: {:?}", readings);
 
   let query_string = format!(
     r#"
@@ -89,17 +127,22 @@ pub async fn add_srs_item(
       (CreationDate, AssociatedKanji, NextAnswerDate,
       Meanings, Readings)
       VALUES
-      (?, ?, ?, '', '')
-    "#
+      (?, ?, ?, ?, ?)
+    "#,
   );
 
   let utc_now = Ticks::now().map_err(|err| err.to_string())?;
   let query = sqlx::query(&query_string)
     .bind(&utc_now)
-    .bind(&opts.character)
-    .bind(&utc_now);
+    .bind(&options.character)
+    .bind(&utc_now)
+    .bind(&meanings)
+    .bind(&readings);
 
-  query.execute(&db.0).await.map_err(|err| err.to_string())?;
+  query
+    .execute(&srs_db.0)
+    .await
+    .map_err(|err| err.to_string())?;
 
   Ok(())
 }
@@ -176,5 +219,26 @@ pub async fn update_srs_item(
   item_id: u32,
   correct: bool,
 ) -> Result<(), String> {
-  todo!()
+  let (success, failure) = match correct {
+    true => (1, 0),
+    false => (0, 1),
+  };
+
+  sqlx::query(
+    r#"
+    UPDATE SrsEntrySet
+    SET
+      SuccessCount = SuccessCount + ?,
+      FailureCount = FailureCount + ?
+    WHERE ID = ?
+   "#,
+  )
+  .bind(success)
+  .bind(failure)
+  .bind(item_id)
+  .execute(&srs_db.0)
+  .await
+  .map_err(|err| err.to_string())?;
+
+  Ok(())
 }

@@ -3,10 +3,9 @@ import useSWR from "swr";
 import { Box, Flex, Grid, GridItem, LinkBox, Stack } from "@chakra-ui/layout";
 
 import styles from "./KanjiPane.module.scss";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import KanjiDisplay from "../components/KanjiDisplay";
 import { Kanji } from "../types/Kanji";
-import classNames from "classnames";
 import { KanjiList } from "../components/KanjiList";
 import { useEffect, useState } from "react";
 

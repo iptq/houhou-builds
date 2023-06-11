@@ -38,8 +38,6 @@ pub async fn process_kradfile(
       }
       _ => continue,
     };
-
-    println!("kanji: {}, radicals: {:?}", kanji, radicals);
   }
 
   Ok(())

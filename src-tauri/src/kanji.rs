@@ -70,7 +70,6 @@ pub async fn get_kanji(
   options: Option<GetKanjiOptions>,
 ) -> Result<GetKanjiResult, String> {
   let opts = options.unwrap_or_default();
-  println!("opts: {opts:?}");
 
   let looking_for_character_clause = match opts.character {
     None => String::new(),
@@ -160,8 +159,6 @@ pub async fn get_kanji(
         },
       );
     }
-
-    println!("SRS MAP: {srs_info_map:?}");
   };
 
   // Put it all together
