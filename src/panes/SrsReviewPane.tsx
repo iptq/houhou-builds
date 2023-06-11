@@ -4,38 +4,20 @@ import {
   Input,
   InputGroup,
   InputLeftElement,
-  InputRightElement,
   Progress,
   Spinner,
   useDisclosure,
 } from "@chakra-ui/react";
 import styles from "./SrsReviewPane.module.scss";
-import { useEffect, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/tauri";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowBackIcon, CheckIcon } from "@chakra-ui/icons";
-import { FormEvent } from "react";
+import { ArrowBackIcon } from "@chakra-ui/icons";
 import ConfirmQuitModal from "../components/utils/ConfirmQuitModal";
 import * as _ from "lodash-es";
-import InputBox from "../components/utils/InputBox";
-
-export interface SrsEntry {
-  associated_kanji: string;
-  current_grade: number;
-  meanings: string[];
-  readings: string[];
-}
-
-export enum ReviewItemType {
-  MEANING = "MEANING",
-  READING = "READING",
-}
-
-export interface ReviewItem {
-  type: ReviewItemType;
-  challenge: string;
-  possibleAnswers: string[];
-}
+import { romajiToKana } from "../lib/kanaHelper";
+import { ReviewItem, ReviewItemType, SrsEntry } from "../types/Srs";
+import classNames from "classnames";
 
 const batchSize = 10;
 
@@ -58,6 +40,7 @@ export function Component() {
   const [anyProgress, setAnyProgress] = useState(false);
   const [startingSize, setStartingSize] = useState<number | null>(null);
   const [currentAnswer, setCurrentAnswer] = useState("");
+  const [isIncorrect, setIsIncorrect] = useState(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const navigate = useNavigate();
 
@@ -65,7 +48,6 @@ export function Component() {
     if (!reviewQueue) {
       invoke<SrsEntry[]>("generate_review_batch")
         .then((result) => {
-          // setReviewBatch(result);
           const newReviews: ReviewItem[] = result.flatMap((srsEntry) => [
             {
               type: ReviewItemType.MEANING,
@@ -89,49 +71,58 @@ export function Component() {
     }
   }, [reviewQueue]);
 
+  if (!reviewQueue) return <Spinner />;
+  if (reviewQueue.length == 0) return <Done />;
+  const nextItem = reviewQueue[0];
+  const possibleAnswers = new Set(nextItem.possibleAnswers);
+
   const formSubmit = (evt: FormEvent) => {
     evt.preventDefault();
     if (!reviewQueue) return;
 
     // Check the answer
+    if (!possibleAnswers.has(currentAnswer)) {
+      setIsIncorrect(true);
+      return;
+    }
 
     // Set up for next question!
     setAnyProgress(true);
+    setIsIncorrect(false);
     setCurrentAnswer("");
     const [_, ...rest] = reviewQueue;
     setReviewQueue(rest);
   };
 
-  if (!reviewQueue) return <Spinner />;
-  if (reviewQueue.length == 0) return <Done />;
-  const nextItem = reviewQueue[0];
-
   const inputBox = (kanaInput: boolean) => {
+    const onChange = (evt: ChangeEvent<HTMLInputElement>) => {
+      let newValue = evt.target.value;
+      if (kanaInput) newValue = romajiToKana(newValue) ?? newValue;
+
+      setCurrentAnswer(newValue);
+    };
+
+    const className = classNames(styles["input-box"], isIncorrect && styles["incorrect"]);
+    const placeholder = isIncorrect ? "Wrong! Try again..." : "Enter your answer...";
+
     return (
       <InputGroup>
         <InputLeftElement>{kanaInput ? "あ" : "A"}</InputLeftElement>
 
-        <InputBox
-          kanaInput={kanaInput}
+        <Input
           value={currentAnswer}
-          setValue={setCurrentAnswer}
+          onChange={onChange}
           autoFocus
-          className={styles["input-box"]}
-          placeholder="Enter your answer..."
+          className={className}
+          placeholder={placeholder}
           spellCheck={false}
           backgroundColor={"white"}
         />
-
-        <InputRightElement>
-          <CheckIcon color="green.500" />
-        </InputRightElement>
       </InputGroup>
     );
   };
 
   const renderInside = () => {
-    console.log("next item", nextItem);
-
     const kanaInput = nextItem.type == ReviewItemType.READING;
 
     return (

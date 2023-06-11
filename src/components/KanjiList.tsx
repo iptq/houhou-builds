@@ -7,6 +7,7 @@ import { Kanji } from "../types/Kanji";
 import { Input, Spinner } from "@chakra-ui/react";
 import { useCallback, useEffect, useState } from "react";
 import SearchBar from "./SearchBar";
+import GradeBadge from "./utils/GradeBadge";
 
 export interface KanjiListProps {
   kanjiList: Kanji[];
@@ -30,12 +31,13 @@ export function KanjiList({
     },
     [setLoadingCanary],
   );
+
+  // Infinite scroll
   useEffect(() => {
     if (loadingCanary && !isLoadingMore) {
       const observer = new IntersectionObserver((entries) => {
         for (const entry of entries) {
           if (entry.isIntersecting) {
-            console.log("loading more shit");
             loadMoreKanji();
             setIsLoadingMore(true);
           }
@@ -62,7 +64,8 @@ export function KanjiList({
             {kanji.character}
           </GridItem>
           <GridItem>{kanji.meanings[0].meaning}</GridItem>
-          <GridItem>
+          <GridItem className={styles.badges}>
+            <GradeBadge grade={kanji.srs_info?.current_grade} />
             <Badge>#{kanji.most_used_rank} common</Badge>
           </GridItem>
         </Grid>

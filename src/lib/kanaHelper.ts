@@ -1,3 +1,5 @@
+// See https://github.com/Doublevil/Houhou-SRS/blob/master/Kanji.Common/Helpers/KanaHelper.cs
+
 import kanadata from "../data/kanadata.json";
 
 /**

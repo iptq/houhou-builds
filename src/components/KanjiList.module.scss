@@ -41,7 +41,6 @@ $kanjiCharacterSize: 28px;
   display: flex;
   flex-direction: column;
   gap: 4px;
-
   direction: ltr;
 }
 
@@ -61,4 +60,11 @@ $kanjiCharacterSize: 28px;
 
 .search-container {
   padding: 4px 8px;
+}
+
+.badges {
+  display: flex;
+  flex-direction: row;
+  gap: 6px;
+  align-items: flex-start;
 }

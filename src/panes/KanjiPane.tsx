@@ -35,9 +35,10 @@ export function Component() {
   }
 
   const loadMoreKanji = async () => {
-    const result = await invoke<GetKanjiResult>("get_kanji", { options: {skip: kanjiList.length }});
-    console.log("invoked result", result);
-    setKanjiList([...kanjiList, ...result.kanji])
+    const result = await invoke<GetKanjiResult>("get_kanji", {
+      options: { skip: kanjiList.length, include_srs_info: true },
+    });
+    setKanjiList([...kanjiList, ...result.kanji]);
   };
 
   return (

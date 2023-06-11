@@ -12,6 +12,7 @@ export interface KanjiMeaning {
 
 export interface KanjiSrsInfo {
   id: number;
+  current_grade: number;
   next_answer_date: number;
   associated_kanji: string;
 }

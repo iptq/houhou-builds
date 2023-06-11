@@ -58,6 +58,7 @@ pub struct GetKanjiResult {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct KanjiSrsInfo {
   id: u32,
+  current_grade: u32,
   next_answer_date: EpochMs,
   associated_kanji: String,
 }
@@ -145,6 +146,7 @@ pub async fn get_kanji(
       };
 
       let id = row.get("ID");
+      let current_grade = row.get("CurrentGrade");
       let next_answer_date: i64 = row.get("NextAnswerDate");
       let next_answer_date = Ticks(next_answer_date).epoch_ms();
 
@@ -152,6 +154,7 @@ pub async fn get_kanji(
         associated_kanji.clone(),
         KanjiSrsInfo {
           id,
+          current_grade,
           next_answer_date,
           associated_kanji,
         },
