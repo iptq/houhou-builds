@@ -9,11 +9,15 @@ extern crate serde;
 mod kanji;
 mod srs;
 
+use std::process;
 use std::str::FromStr;
 
 use anyhow::{Context, Result};
 use sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions};
-use tauri::SystemTray;
+use tauri::{
+  CustomMenuItem, SystemTray, SystemTrayEvent, SystemTrayMenu,
+  SystemTrayMenuItem, WindowEvent,
+};
 use tokio::fs;
 
 use crate::kanji::KanjiDb;
@@ -44,7 +48,11 @@ async fn main() -> Result<()> {
   sqlx::migrate!().run(&srs_pool).await?;
 
   // System tray
-  let tray = SystemTray::new();
+  let quit = CustomMenuItem::new("quit".to_string(), "Quit");
+  let tray_menu = SystemTrayMenu::new().add_item(quit);
+  let tray = SystemTray::new()
+    .with_tooltip("Houhou")
+    .with_menu(tray_menu);
 
   // Build tauri
   tauri::Builder::default()
@@ -56,6 +64,22 @@ async fn main() -> Result<()> {
       kanji::get_kanji,
       kanji::get_single_kanji
     ])
+    .on_window_event(|event| match event.event() {
+      WindowEvent::CloseRequested { api, .. } => {
+        event.window().hide().unwrap();
+        api.prevent_close();
+      }
+      _ => {}
+    })
+    .on_system_tray_event(|app, event| match event {
+      SystemTrayEvent::MenuItemClick { id, .. } => match id.as_str() {
+        "quit" => {
+          process::exit(0);
+        }
+        _ => {}
+      },
+      _ => {}
+    })
     .run(tauri::generate_context!())
     .context("error while running tauri application")?;
 
