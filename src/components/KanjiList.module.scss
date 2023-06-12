@@ -35,6 +35,7 @@ $kanjiCharacterSize: 28px;
 .kanji-list-scroll {
   direction: rtl;
   overflow-y: scroll;
+  overscroll-behavior-y: none;
 }
 
 .kanji-list-inner {

@@ -26,7 +26,7 @@ use crate::srs::SrsDb;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-  let app_dir = dirs::config_dir().unwrap().join("houhou");
+  let app_dir = dirs::state_dir().unwrap().join("houhou");
   fs::create_dir_all(&app_dir).await?;
 
   // Open kanji db
@@ -60,6 +60,15 @@ async fn main() -> Result<()> {
     .manage(KanjiDb(kanji_pool))
     .manage(SrsDb(srs_pool))
     .system_tray(tray)
+    .setup(|app| {
+      let resource_path = app
+        .path_resolver()
+        .resolve_resource("./KanjiDatabase.sqlite")
+        .expect("failed to resolve resource");
+      println!("Resource path: {}", resource_path.display());
+
+      Ok(())
+    })
     .invoke_handler(tauri::generate_handler![
       srs::get_srs_stats,
       srs::add_srs_item,

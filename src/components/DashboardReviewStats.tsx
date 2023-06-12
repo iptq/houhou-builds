@@ -5,7 +5,8 @@ import useSWR from "swr";
 import { invoke } from "@tauri-apps/api/tauri";
 import { Link } from "react-router-dom";
 import ConditionalWrapper from "./utils/ConditionalWrapper";
-import ReactTimeago from "react-timeago";
+import ReactTimeago, { Formatter } from "react-timeago";
+import { isValid } from "date-fns";
 
 interface SrsStats {
   reviews_available: number;
@@ -46,7 +47,15 @@ export default function DashboardReviewStats() {
   const canReview = srsStats.reviews_available == 0;
 
   const nextReviewDate = new Date(srsStats.next_review * 1_000);
-  const nextReview = <ReactTimeago date={nextReviewDate} />;
+  const nowFormatter: Formatter = (value, unit, suffix, epochMilliseconds, nextFormatter) => {
+    if (epochMilliseconds < Date.now()) return "now";
+    return nextFormatter?.(value, unit, suffix, epochMilliseconds);
+  };
+  const nextReview = srsStats.next_review ? (
+    <ReactTimeago date={nextReviewDate} formatter={nowFormatter} />
+  ) : (
+    "never"
+  );
 
   const generateStat = (stat: Stat) => {
     return (
@@ -83,7 +92,7 @@ export default function DashboardReviewStats() {
           )}
           elseWrapper={(children) => <Link to="/srs/review">{children}</Link>}
         >
-          <Button isDisabled={canReview} colorScheme="blue">
+          <Button isDisabled={canReview} cursor="pointer" colorScheme="blue">
             Start reviewing <ArrowRightIcon marginLeft={3} />
           </Button>
         </ConditionalWrapper>

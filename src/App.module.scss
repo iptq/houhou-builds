@@ -1,5 +1,10 @@
+@use "sass:color";
+
 $navLinkAccentColor: #09c;
 $navLinkColor: hsl(203, 91%, 91%);
+$navLinkTransparent: hsla(203, 91%, 91%, 0%);
+$grayed: #f4f4f4;
+$grayedTransparent: #f4f4f400;
 
 .main {
   min-height: 0;
@@ -34,7 +39,7 @@ $navLinkColor: hsl(203, 91%, 91%);
   text-align: center;
   padding: 12px;
   border-top: 4px solid transparent;
-  transition: background-color 0.1s ease-out, border-top-color 0.1s ease-out;
+  transition: background 0.1s ease-out, border-top-color 0.1s ease-out;
 
   // Make the top bar seem less web-ish
   user-select: none;
@@ -43,12 +48,17 @@ $navLinkColor: hsl(203, 91%, 91%);
 
   &:not(.link-active):hover {
     border-top-color: #f4f4f4;
-    background: linear-gradient(#f4f4f4, transparent);
+    background: -moz-linear-gradient(180deg, $grayed 0%, $grayedTransparent 100%);
+    background: -webkit-linear-gradient(180deg, $grayed 0%, $grayedTransparent 100%);
+    background: linear-gradient(180deg, $grayed 0%, $grayedTransparent 100%);
   }
 }
 
 .link-active {
   border-top-color: $navLinkAccentColor;
   // background-color: $navLinkColor;
-  background: linear-gradient($navLinkColor, transparent);
+  background: $navLinkColor;
+  background: -moz-linear-gradient(180deg, $navLinkColor 0%, $navLinkTransparent 100%);
+  background: -webkit-linear-gradient(180deg, $navLinkColor 0%, $navLinkTransparent 100%);
+  background: linear-gradient(180deg, $navLinkColor 0%, $navLinkTransparent 100%);
 }
