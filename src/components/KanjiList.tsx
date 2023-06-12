@@ -57,7 +57,6 @@ export function KanjiList({
 
   const renderKanjiItem = (kanji: Kanji, active: boolean) => {
     const className = classNames(styles["kanji-link"], active && styles["kanji-link-active"]);
-    if (kanji.srs_info) console.log("kanji", kanji);
 
     return (
       <Link key={kanji.character} className={className} to={`/kanji/${kanji.character}`}>

@@ -12,7 +12,7 @@ use sqlx::{
 
 pub const TICK_MULTIPLIER: i64 = 1_000_000_000;
 
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 pub struct Ticks(pub i64);
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]

@@ -119,8 +119,6 @@ export function Component() {
 
     // Figure out if we need to update the backend
     if (allQuestionsAnswered(nextItem.parent)) {
-      console.log("SHIET");
-
       const group = nextItem.parent;
       const newLevel = groupUpdatedLevel(group);
 
@@ -132,7 +130,6 @@ export function Component() {
       };
 
       const result = await invoke("update_srs_item", params);
-      console.log("result", result);
     }
 
     // If it's wrong this time
@@ -193,9 +190,6 @@ export function Component() {
 
     return (
       <>
-        <p>{JSON.stringify(completedQueue.map((x) => x.challenge))}</p>
-        <p>{JSON.stringify(reviewQueue.map((x) => x.challenge))}</p>
-
         {startingSize && (
           <Progress
             colorScheme="linkedin"

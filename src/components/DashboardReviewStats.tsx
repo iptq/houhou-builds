@@ -5,6 +5,7 @@ import useSWR from "swr";
 import { invoke } from "@tauri-apps/api/tauri";
 import { Link } from "react-router-dom";
 import ConditionalWrapper from "./utils/ConditionalWrapper";
+import ReactTimeago from "react-timeago";
 
 interface SrsStats {
   reviews_available: number;
@@ -12,6 +13,7 @@ interface SrsStats {
   reviews_today: number;
   total_items: number;
   total_reviews: number;
+  next_review: number;
 
   /// Used to calculate average success
   num_success: number;
@@ -43,6 +45,9 @@ export default function DashboardReviewStats() {
 
   const canReview = srsStats.reviews_available == 0;
 
+  const nextReviewDate = new Date(srsStats.next_review * 1_000);
+  const nextReview = <ReactTimeago date={nextReviewDate} />;
+
   const generateStat = (stat: Stat) => {
     return (
       <GridItem>
@@ -55,16 +60,27 @@ export default function DashboardReviewStats() {
   };
 
   return (
-    <Grid templateColumns="2fr 1fr 1fr" templateRows="1fr 1fr" gap={4}>
-      <GridItem rowSpan={2} className={styles["reviews-available"]}>
-        <Stat>
-          <StatLabel>reviews available</StatLabel>
-          <StatNumber>{srsStats.reviews_available}</StatNumber>
-        </Stat>
+    <Grid templateColumns="repeat(3, 1fr)" templateRows="1fr 1fr" gap={4}>
+      {generateStat({ label: "total items", value: srsStats.total_items })}
+      {generateStat({ label: "reviews today", value: srsStats.reviews_today })}
+      {generateStat({ label: "reviews available", value: srsStats.reviews_available })}
+      {generateStat({ label: "average success", value: averageSuccessStr })}
+      {generateStat({ label: "next review", value: nextReview })}
 
+      <GridItem>
         <ConditionalWrapper
           condition={canReview}
-          wrapper={(children) => <Tooltip label="Add items to start reviewing">{children}</Tooltip>}
+          wrapper={(children) => (
+            <Tooltip
+              label={
+                srsStats.total_items == 0
+                  ? "Add items to start reviewing"
+                  : "Wait for the next review!"
+              }
+            >
+              {children}
+            </Tooltip>
+          )}
           elseWrapper={(children) => <Link to="/srs/review">{children}</Link>}
         >
           <Button isDisabled={canReview} colorScheme="blue">
@@ -72,11 +88,6 @@ export default function DashboardReviewStats() {
           </Button>
         </ConditionalWrapper>
       </GridItem>
-
-      {generateStat({ label: "reviews available", value: srsStats.reviews_available })}
-      {generateStat({ label: "reviews today", value: srsStats.reviews_today })}
-      {generateStat({ label: "total items", value: srsStats.total_items })}
-      {generateStat({ label: "average success", value: averageSuccessStr })}
     </Grid>
   );
 }

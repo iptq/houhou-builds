@@ -21,6 +21,7 @@ pub struct SrsStats {
   /// Used to calculate average success
   num_success: u32,
   num_failure: u32,
+  next_review: Option<i64>,
 }
 
 #[tauri::command]
@@ -31,7 +32,8 @@ pub async fn get_srs_stats(db: State<'_, SrsDb>) -> Result<SrsStats, String> {
     SELECT
       COUNT(*) AS total_items,
       SUM(SuccessCount) AS num_success,
-      SUM(FailureCount) AS num_failure
+      SUM(FailureCount) AS num_failure,
+      MIN(NextAnswerDate) AS next_review
     FROM SrsEntrySet
   "#,
   )
@@ -63,6 +65,11 @@ pub async fn get_srs_stats(db: State<'_, SrsDb>) -> Result<SrsStats, String> {
   .await
   .map_err(|err| err.to_string())?;
 
+  let next_review = row
+    .try_get::<i64, _>("next_review")
+    .ok()
+    .map(|n| n / TICK_MULTIPLIER);
+
   Ok(SrsStats {
     reviews_available: row2[0].get("reviews"),
     reviews_today: row2[1].get("reviews"),
@@ -70,6 +77,7 @@ pub async fn get_srs_stats(db: State<'_, SrsDb>) -> Result<SrsStats, String> {
     total_reviews: 0,
     num_success: row.try_get("num_success").unwrap_or(0),
     num_failure: row.try_get("num_failure").unwrap_or(0),
+    next_review,
   })
 }
 
