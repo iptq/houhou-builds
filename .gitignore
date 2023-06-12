@@ -25,3 +25,4 @@ dist-ssr
 
 houhou.db
 src/data/kanadata.json
+.direnv
