@@ -31,9 +31,9 @@ async fn main() -> Result<()> {
 
   // Open SRS db
   let srs_db_path = app_dir.join("srs_db.sqlite");
-  let srs_db_path_str = srs_db_path.display().to_string();
-  let srs_db_options =
-    SqliteConnectOptions::from_str(&srs_db_path_str)?.create_if_missing(true);
+  let srs_db_options = SqliteConnectOptions::new()
+    .filename(&srs_db_path)
+    .create_if_missing(true);
   println!("Opening srs database at {} ...", srs_db_path.display());
   let srs_pool = SqlitePoolOptions::new()
     .connect_with(srs_db_options)
@@ -58,11 +58,12 @@ async fn main() -> Result<()> {
         .path_resolver()
         .resolve_resource("./KanjiDatabase.sqlite")
         .expect("failed to resolve resource");
+      println!("resource path: {}", resource_path.display());
 
       // Open kanji db
-      let resource_path_str = resource_path.display().to_string();
-      let kanji_db_options =
-        SqliteConnectOptions::from_str(&resource_path_str)?.read_only(true);
+      let kanji_db_options = SqliteConnectOptions::new()
+        .filename(&resource_path)
+        .read_only(true);
       let kanji_pool =
         SqlitePoolOptions::new().connect_lazy_with(kanji_db_options);
 
