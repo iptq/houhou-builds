@@ -1,4 +1,4 @@
-use std::time::Duration;
+use std::{path::PathBuf, time::Duration};
 
 use sqlx::{Row, SqlitePool};
 use tauri::State;
@@ -8,7 +8,7 @@ use crate::{
   utils::{Ticks, TICK_MULTIPLIER},
 };
 
-pub struct SrsDb(pub SqlitePool);
+pub struct SrsDb(pub SqlitePool, pub PathBuf);
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SrsStats {

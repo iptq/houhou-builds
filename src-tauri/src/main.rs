@@ -16,7 +16,7 @@ use std::str::FromStr;
 use anyhow::{Context, Result};
 use sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions};
 use tauri::{
-  CustomMenuItem, SystemTray, SystemTrayEvent, SystemTrayMenu,
+  CustomMenuItem, Manager, SystemTray, SystemTrayEvent, SystemTrayMenu,
   SystemTrayMenuItem, WindowEvent,
 };
 use tokio::fs;
@@ -26,27 +26,21 @@ use crate::srs::SrsDb;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-  let app_dir = dirs::state_dir().unwrap().join("houhou");
+  let app_dir = dirs::data_dir().unwrap().join("houhou");
   fs::create_dir_all(&app_dir).await?;
-
-  // Open kanji db
-  let kanji_db_options =
-    SqliteConnectOptions::from_str("./KanjiDatabase.sqlite")?.read_only(true);
-  let kanji_pool = SqlitePoolOptions::new()
-    .connect_with(kanji_db_options)
-    .await?;
 
   // Open SRS db
   let srs_db_path = app_dir.join("srs_db.sqlite");
+  let srs_db_path_str = srs_db_path.display().to_string();
   let srs_db_options =
-    SqliteConnectOptions::from_str(&srs_db_path.display().to_string())?
-      .create_if_missing(true);
+    SqliteConnectOptions::from_str(&srs_db_path_str)?.create_if_missing(true);
   println!("Opening srs database at {} ...", srs_db_path.display());
   let srs_pool = SqlitePoolOptions::new()
     .connect_with(srs_db_options)
     .await?;
   println!("Running migrations...");
   sqlx::migrate!().run(&srs_pool).await?;
+  let srs_db = SrsDb(srs_pool, srs_db_path);
 
   // System tray
   let quit = CustomMenuItem::new("quit".to_string(), "Quit");
@@ -57,15 +51,22 @@ async fn main() -> Result<()> {
 
   // Build tauri
   tauri::Builder::default()
-    .manage(KanjiDb(kanji_pool))
-    .manage(SrsDb(srs_pool))
+    .manage(srs_db)
     .system_tray(tray)
     .setup(|app| {
       let resource_path = app
         .path_resolver()
         .resolve_resource("./KanjiDatabase.sqlite")
         .expect("failed to resolve resource");
-      println!("Resource path: {}", resource_path.display());
+
+      // Open kanji db
+      let resource_path_str = resource_path.display().to_string();
+      let kanji_db_options =
+        SqliteConnectOptions::from_str(&resource_path_str)?.read_only(true);
+      let kanji_pool =
+        SqlitePoolOptions::new().connect_lazy_with(kanji_db_options);
+
+      app.manage(KanjiDb(kanji_pool, resource_path));
 
       Ok(())
     })
@@ -75,6 +76,7 @@ async fn main() -> Result<()> {
       srs::generate_review_batch,
       srs::update_srs_item,
       kanji::get_kanji,
+      utils::application_info,
     ])
     .on_window_event(|event| match event.event() {
       WindowEvent::CloseRequested { api, .. } => {

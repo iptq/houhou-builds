@@ -9,6 +9,33 @@ use sqlx::{
   error::BoxDynError,
   Decode, Encode, Sqlite, Type,
 };
+use tauri::State;
+
+use crate::{
+  kanji::KanjiDb,
+  srs::{self, SrsDb},
+};
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ApplicationInfo {
+  kanji_db_path: String,
+  srs_db_path: String,
+}
+
+#[tauri::command]
+pub async fn application_info(
+  kanji_db: State<'_, KanjiDb>,
+  srs_db: State<'_, SrsDb>,
+) -> Result<ApplicationInfo, String> {
+  Ok(ApplicationInfo {
+    kanji_db_path: kanji_db.1.display().to_string(),
+    srs_db_path: srs_db.1.display().to_string(),
+  })
+}
+
+// *****************************************************
+// Ticks
+// *****************************************************
 
 pub const TICK_MULTIPLIER: i64 = 1_000_000_000;
 

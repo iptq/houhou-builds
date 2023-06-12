@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, path::PathBuf};
 
 use sqlx::{sqlite::SqliteRow, Encode, Row, SqlitePool, Type};
 use tauri::State;
@@ -8,7 +8,7 @@ use crate::{
   utils::{EpochMs, Ticks},
 };
 
-pub struct KanjiDb(pub SqlitePool);
+pub struct KanjiDb(pub SqlitePool, pub PathBuf);
 
 #[derive(Debug, Derivative, Serialize, Deserialize)]
 #[derivative(Default)]
