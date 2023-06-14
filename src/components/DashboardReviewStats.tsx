@@ -7,18 +7,10 @@ import { Link } from "react-router-dom";
 import ConditionalWrapper from "./utils/ConditionalWrapper";
 import ReactTimeago, { Formatter } from "react-timeago";
 import { isValid } from "date-fns";
+import { SrsStats } from "../panes/SrsPane";
 
-interface SrsStats {
-  reviews_available: number;
-
-  reviews_today: number;
-  total_items: number;
-  total_reviews: number;
-  next_review: number;
-
-  /// Used to calculate average success
-  num_success: number;
-  num_failure: number;
+export interface DashboardReviewStatsProps {
+  srsStats: SrsStats;
 }
 
 interface Stat {
@@ -26,21 +18,7 @@ interface Stat {
   value: any;
 }
 
-export default function DashboardReviewStats() {
-  const {
-    data: srsStats,
-    error,
-    isLoading,
-  } = useSWR(["get_srs_stats"], ([command]) => invoke<SrsStats>(command));
-
-  if (!srsStats)
-    return (
-      <>
-        {JSON.stringify([srsStats, error, isLoading])}
-        Loading...
-      </>
-    );
-
+export default function DashboardReviewStats({ srsStats }: DashboardReviewStatsProps) {
   const averageSuccess = srsStats.num_success / (srsStats.num_success + srsStats.num_failure || 1);
   const averageSuccessStr = `${Math.round(averageSuccess * 10000) / 100}%`;
 

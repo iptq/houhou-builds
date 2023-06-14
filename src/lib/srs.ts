@@ -16,7 +16,9 @@ export interface SrsLevel {
 }
 
 import srsLevelMap from "../data/srslevels.json";
-export const srsLevels: Map<number, SrsLevel> = new Map(srsLevelMap.map((v) => [v.value, v]));
+export const srsLevels: Map<number, SrsLevel> = new Map(
+  srsLevelMap.levels.map((v) => [v.value, v]),
+);
 
 export interface SrsQuestionGroup {
   srsEntry: SrsEntry;

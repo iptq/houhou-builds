@@ -1,4 +1,4 @@
-use std::{path::PathBuf, time::Duration};
+use std::{collections::HashMap, path::PathBuf, time::Duration};
 
 use sqlx::{Row, SqlitePool};
 use tauri::State;
@@ -18,10 +18,12 @@ pub struct SrsStats {
   total_items: u32,
   total_reviews: u32,
 
+  next_review: Option<i64>,
+  grades: HashMap<u32, u32>,
+
   /// Used to calculate average success
   num_success: u32,
   num_failure: u32,
-  next_review: Option<i64>,
 }
 
 #[tauri::command]
@@ -65,6 +67,21 @@ pub async fn get_srs_stats(db: State<'_, SrsDb>) -> Result<SrsStats, String> {
   .await
   .map_err(|err| err.to_string())?;
 
+  // current grades query
+  let row3 = sqlx::query(
+    r#"
+    SELECT CurrentGrade, COUNT(*) FROM SrsEntrySet
+      GROUP BY CurrentGrade
+    "#,
+  )
+  .fetch_all(&db.0)
+  .await
+  .map_err(|err| err.to_string())?;
+  let grades = row3
+    .into_iter()
+    .map(|row| (row.get::<u32, _>(0), row.get::<u32, _>(1)))
+    .collect::<HashMap<_, _>>();
+
   let next_review = row
     .try_get::<i64, _>("next_review")
     .ok()
@@ -78,6 +95,7 @@ pub async fn get_srs_stats(db: State<'_, SrsDb>) -> Result<SrsStats, String> {
     num_success: row.try_get("num_success").unwrap_or(0),
     num_failure: row.try_get("num_failure").unwrap_or(0),
     next_review,
+    grades,
   })
 }
 

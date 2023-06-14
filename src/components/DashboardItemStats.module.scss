@@ -1,0 +1,40 @@
+.container {
+  width: 100%;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.group {
+  flex-grow: 1;
+  color: white;
+  text-align: center;
+  border-radius: 4px;
+  padding: 12px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.groupHeader {
+  h1 {
+    font-size: 2.5em;
+    text-shadow: 1px 1px black;
+  }
+}
+
+.groupLevels {
+  display: flex;
+  gap: 4px;
+  justify-content: space-evenly;
+
+  h3 {
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    background-color: rgba(255, 255, 255, 0.25);
+  }
+}
+
+.level {
+  flex-grow: 1;
+}
