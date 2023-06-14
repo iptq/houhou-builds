@@ -1,7 +1,14 @@
-# Tauri + React + Typescript
+# Houhou SRS
 
-This template should help get you started developing with Tauri, React and Typescript in Vite.
+Based on [Houhou SRS](https://houhou-srs.com)
 
-## Recommended IDE Setup
+Should run on Windows, Mac, and Linux in theory.
 
-- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+Check [releases](https://git.mzhang.io/michael/houhou/releases) to see if there are any builds
+
+### Building from source
+
+```
+npm ci
+npm run tauri dev
+```
