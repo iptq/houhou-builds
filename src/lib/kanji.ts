@@ -1,8 +1,15 @@
 export interface Kanji {
   character: string;
-  most_used_rank: number;
   meanings: KanjiMeaning[];
+
+  grade: number;
+  jlpt_level: number;
+  wanikani_level?: number;
+  newspaper_rank: number;
+  most_used_rank: number;
+
   srs_info?: KanjiSrsInfo;
+  strokes?: string;
 }
 
 export interface KanjiMeaning {

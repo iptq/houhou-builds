@@ -30,19 +30,6 @@ import classNames from "classnames";
 
 const batchSize = 10;
 
-function Done() {
-  return (
-    <>
-      <p>oh Shit you're done!!! poggerse</p>
-      <Link to="/">
-        <Button colorScheme="blue">
-          <ArrowBackIcon /> Return
-        </Button>
-      </Link>
-    </>
-  );
-}
-
 export function Component() {
   // null = has not started, (.length == 0) = finished
   const [reviewQueue, setReviewQueue] = useState<ReviewItem[] | null>(null);
@@ -79,7 +66,7 @@ export function Component() {
               parent: srsQuestionGroup,
               type: ReviewItemType.READING,
               challenge: srsEntry.associated_kanji,
-              possibleAnswers: srsEntry.readings,
+              possibleAnswers: srsEntry.readings.map((reading) => reading.replaceAll(/\./g, "")),
               isCorrect: null,
               timesRepeated: 0,
             };
@@ -101,7 +88,10 @@ export function Component() {
   }, [reviewQueue]);
 
   if (!reviewQueue) return <Spinner />;
-  if (reviewQueue.length == 0) return <Done />;
+
+  // Done! Go back to the home page
+  if (reviewQueue.length == 0) return navigate("/");
+
   const [nextItem, ...restOfQueue] = reviewQueue;
   const possibleAnswers = new Set(nextItem.possibleAnswers);
 

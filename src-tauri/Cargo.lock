@@ -1569,9 +1569,11 @@ name = "houhou"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "base64 0.21.2",
  "clap",
  "derivative",
  "dirs",
+ "flate2",
  "serde",
  "serde_json",
  "sqlx",

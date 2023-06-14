@@ -1,13 +1,11 @@
 import { invoke } from "@tauri-apps/api/tauri";
 import { GetKanjiResult } from "../panes/KanjiPane";
-import TimeAgo from "react-timeago";
 import styles from "./KanjiDisplay.module.scss";
 import useSWR from "swr";
-import { Button } from "@chakra-ui/button";
-import { AddIcon } from "@chakra-ui/icons";
 import SelectOnClick from "./utils/SelectOnClick";
-import { Alert, AlertIcon } from "@chakra-ui/alert";
-import { isValid } from "date-fns";
+import classNames from "classnames";
+import Strokes from "./Strokes";
+import SrsPart from "./SrsPart";
 
 interface KanjiDisplayProps {
   kanjiCharacter: string;
@@ -20,7 +18,9 @@ export default function KanjiDisplay({ kanjiCharacter }: KanjiDisplayProps) {
     isLoading,
     mutate,
   } = useSWR(["get_kanji", kanjiCharacter], ([command, character]) =>
-    invoke<GetKanjiResult>(command, { options: { character, include_srs_info: true } }),
+    invoke<GetKanjiResult>(command, {
+      options: { character, include_strokes: true, include_srs_info: true },
+    }),
   );
 
   if (!kanjiResult || !kanjiResult.kanji)
@@ -42,27 +42,6 @@ export default function KanjiDisplay({ kanjiCharacter }: KanjiDisplayProps) {
     mutate();
   };
 
-  let srsPart = (
-    <Button onClick={addSrsItem} colorScheme="green">
-      <AddIcon /> Add to SRS
-    </Button>
-  );
-  if (kanji.srs_info) {
-    const nextAnswerDate = new Date(kanji.srs_info.next_answer_date);
-    srsPart = (
-      <Alert status="info">
-        <AlertIcon />
-        <p>You are learning this item!</p>
-
-        {isValid(nextAnswerDate) && (
-          <p>
-            (Due: <TimeAgo date={nextAnswerDate} />)
-          </p>
-        )}
-      </Alert>
-    );
-  }
-
   return (
     <>
       <details>
@@ -70,11 +49,48 @@ export default function KanjiDisplay({ kanjiCharacter }: KanjiDisplayProps) {
         <pre>{JSON.stringify(kanji, null, 2)}</pre>
       </details>
 
-      <SelectOnClick className={styles.display}>{kanji.character}</SelectOnClick>
+      <main className={styles.main}>
+        <div className={styles.topRow}>
+          <SelectOnClick className={styles.display}>{kanji.character}</SelectOnClick>
 
-      {kanji.meanings.map((m) => m.meaning).join(", ")}
+          <div className={styles.kanjiInfo}>
+            <div className={styles.meanings}>{kanji.meanings.map((m) => m.meaning).join(", ")}</div>
 
-      <div>{srsPart}</div>
+            <div className={styles.boxes}>
+              {kanji.strokes && (
+                <Strokes
+                  strokeData={kanji.strokes}
+                  size={72}
+                  className={classNames(styles.box, styles.strokes)}
+                />
+              )}
+
+              <div className={styles.box}>
+                <span className={styles.big}>{kanji.most_used_rank}</span>
+                <span>most used</span>
+              </div>
+
+              <div className={styles.box}>
+                <span className={styles.big}>N{kanji.jlpt_level}</span>
+                <span>JLPT Level</span>
+              </div>
+
+              {kanji.wanikani_level && (
+                <div className={styles.box}>
+                  <span className={styles.big}>Level {kanji.wanikani_level}</span>
+                  <span>on Wanikani</span>
+                </div>
+              )}
+
+              <SrsPart srsInfo={kanji.srs_info} addSrsItem={addSrsItem} />
+            </div>
+          </div>
+        </div>
+
+        <div className={styles.vocabSection}>
+          <h2>Related Vocab</h2>
+        </div>
+      </main>
     </>
   );
 }

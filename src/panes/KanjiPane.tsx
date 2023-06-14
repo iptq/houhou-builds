@@ -16,11 +16,7 @@ export interface GetKanjiResult {
 
 export function Component() {
   const { selectedKanji } = useParams();
-  const {
-    data: baseData,
-    error,
-    isLoading,
-  } = useSWR("get_kanji", () =>
+  const { data: baseData, error } = useSWR("get_kanji", () =>
     invoke<GetKanjiResult>("get_kanji", { options: { include_srs_info: true } }),
   );
 
