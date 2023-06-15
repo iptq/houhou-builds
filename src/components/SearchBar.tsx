@@ -15,6 +15,10 @@ export default function SearchBar({ isLoading, setSearchQuery }: SearchBarProps)
     setSearchQuery(internalQuery);
   };
 
+  let rightElement;
+  if (isLoading) rightElement = <Spinner />;
+  else rightElement = <SearchIcon />;
+
   return (
     <form onSubmit={onSubmit}>
       <InputGroup>
@@ -26,9 +30,7 @@ export default function SearchBar({ isLoading, setSearchQuery }: SearchBarProps)
           value={internalQuery}
           onChange={(evt) => setInternalQuery(evt.target.value)}
         />
-        <InputRightElement>
-          {{ false: <SearchIcon />, true: <Spinner /> }[isLoading]}
-        </InputRightElement>
+        <InputRightElement>{rightElement}</InputRightElement>
       </InputGroup>
     </form>
   );

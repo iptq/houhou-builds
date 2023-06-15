@@ -1,4 +1,6 @@
+// @ts-ignore: https://git.mzhang.io/michael/houhou/issues/4
 import buildFormatter from "react-timeago/es6/formatters/buildFormatter";
+// @ts-ignore: https://git.mzhang.io/michael/houhou/issues/4
 import shortEnStrings from "react-timeago/es6/language-strings/en-short";
 import classNames from "classnames";
 import { KanjiSrsInfo } from "../lib/kanji";

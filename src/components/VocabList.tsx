@@ -19,7 +19,7 @@ export default function VocabList({ className, kanjiId }: VocabListProps) {
 
   if (!data) {
     console.error(error);
-    return;
+    return <>Error {error}</>;
   }
 
   return (
