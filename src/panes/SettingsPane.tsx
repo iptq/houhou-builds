@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api/tauri";
-import useSWR, { useSWRConfig } from "swr";
+import useSWR from "swr";
 import SelectOnClick from "../components/utils/SelectOnClick";
 
 interface ApplicationInfo {

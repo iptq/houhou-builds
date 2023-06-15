@@ -1,12 +1,8 @@
 import { Button, Grid, GridItem, Stat, StatLabel, StatNumber, Tooltip } from "@chakra-ui/react";
 import { ArrowRightIcon } from "@chakra-ui/icons";
-import styles from "./DashboardReviewStats.module.scss";
-import useSWR from "swr";
-import { invoke } from "@tauri-apps/api/tauri";
 import { Link } from "react-router-dom";
 import ConditionalWrapper from "./utils/ConditionalWrapper";
 import ReactTimeago, { Formatter } from "react-timeago";
-import { isValid } from "date-fns";
 import { SrsStats } from "../panes/SrsPane";
 
 export interface DashboardReviewStatsProps {
@@ -15,7 +11,7 @@ export interface DashboardReviewStatsProps {
 
 interface Stat {
   label: string;
-  value: any;
+  value: string | number | JSX.Element;
 }
 
 export default function DashboardReviewStats({ srsStats }: DashboardReviewStatsProps) {

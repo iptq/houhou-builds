@@ -6,6 +6,7 @@ import SelectOnClick from "./utils/SelectOnClick";
 import classNames from "classnames";
 import Strokes from "./Strokes";
 import SrsPart from "./SrsPart";
+import VocabList from "./VocabList";
 
 interface KanjiDisplayProps {
   kanjiCharacter: string;
@@ -44,11 +45,6 @@ export default function KanjiDisplay({ kanjiCharacter }: KanjiDisplayProps) {
 
   return (
     <>
-      <details>
-        <summary>Debug</summary>
-        <pre>{JSON.stringify(kanji, null, 2)}</pre>
-      </details>
-
       <main className={styles.main}>
         <div className={styles.topRow}>
           <SelectOnClick className={styles.display}>{kanji.character}</SelectOnClick>
@@ -89,6 +85,8 @@ export default function KanjiDisplay({ kanjiCharacter }: KanjiDisplayProps) {
 
         <div className={styles.vocabSection}>
           <h2>Related Vocab</h2>
+
+          <VocabList kanjiId={kanji.id} className={styles.vocabList} />
         </div>
       </main>
     </>

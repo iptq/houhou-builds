@@ -1,6 +1,6 @@
 import { invoke } from "@tauri-apps/api/tauri";
 import useSWR from "swr";
-import { Box, Flex, Grid, GridItem, LinkBox, Stack } from "@chakra-ui/layout";
+import { Box, Flex } from "@chakra-ui/layout";
 
 import styles from "./KanjiPane.module.scss";
 import { useParams } from "react-router-dom";
@@ -9,6 +9,7 @@ import { Kanji } from "../lib/kanji";
 import { KanjiList } from "../components/KanjiList";
 import { useEffect, useState } from "react";
 import SearchBar from "../components/SearchBar";
+import { QuestionIcon, UpDownIcon } from "@chakra-ui/icons";
 
 export interface GetKanjiResult {
   count: number;
@@ -55,9 +56,17 @@ export function Component() {
 
   return (
     <Flex className={styles["kanji-pane-container"]}>
-      <Box className={styles["kanji-pane-list"]}>
-        <div className={styles["search-container"]}>
+      <Box className={styles.kanjiPaneList}>
+        <div className={styles.searchContainer}>
           <SearchBar isLoading={isLoading} setSearchQuery={setSearchQuery} />
+
+          <details>
+            <summary className={styles.advancedSearch}>Advanced</summary>
+
+            <a href="">
+              Help <QuestionIcon />
+            </a>
+          </details>
         </div>
 
         {kanjiList && (

@@ -1,12 +1,10 @@
-import { GetKanjiResult } from "../panes/KanjiPane";
 import classNames from "classnames";
 import { Link } from "react-router-dom";
 import { Badge, Grid, GridItem } from "@chakra-ui/layout";
 import styles from "./KanjiList.module.scss";
 import { Kanji } from "../lib/kanji";
-import { Input, Spinner } from "@chakra-ui/react";
+import { Spinner } from "@chakra-ui/react";
 import { useCallback, useEffect, useState } from "react";
-import SearchBar from "./SearchBar";
 import LevelBadge from "./utils/LevelBadge";
 
 export interface KanjiListProps {

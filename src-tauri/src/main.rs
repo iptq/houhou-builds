@@ -12,13 +12,12 @@ pub mod utils;
 pub mod vocab;
 
 use std::process;
-use std::str::FromStr;
 
 use anyhow::{Context, Result};
 use sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions};
 use tauri::{
   CustomMenuItem, Manager, SystemTray, SystemTrayEvent, SystemTrayMenu,
-  SystemTrayMenuItem, WindowEvent,
+  WindowEvent,
 };
 use tokio::fs;
 
@@ -78,6 +77,7 @@ async fn main() -> Result<()> {
       srs::generate_review_batch,
       srs::update_srs_item,
       kanji::get_kanji,
+      vocab::get_vocab,
       utils::application_info,
     ])
     .on_window_event(|event| match event.event() {

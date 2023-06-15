@@ -8,9 +8,10 @@
   gap: 16px;
 }
 
-.kanji-pane-list {
+.kanjiPaneList {
   display: flex;
   flex-direction: column;
+  gap: 12px;
 
   min-height: 0;
   min-width: 280px;
@@ -18,4 +19,14 @@
 
 .right-side {
   flex-grow: 5;
+}
+
+.searchContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+.advancedSearch {
+  font-size: 0.8em;
+  cursor: pointer;
 }

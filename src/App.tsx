@@ -1,4 +1,4 @@
-import { Link, RouterProvider, createHashRouter } from "react-router-dom";
+import { Link, RouterProvider } from "react-router-dom";
 import classNames from "classnames";
 import { ChakraProvider, Flex } from "@chakra-ui/react";
 import { createBrowserRouter } from "react-router-dom";

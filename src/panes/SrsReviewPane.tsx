@@ -1,22 +1,11 @@
-import {
-  Button,
-  Container,
-  Input,
-  InputGroup,
-  InputLeftElement,
-  InputRightElement,
-  Progress,
-  Spinner,
-  useDisclosure,
-} from "@chakra-ui/react";
+import { Button, Container, Progress, Spinner, useDisclosure } from "@chakra-ui/react";
 import styles from "./SrsReviewPane.module.scss";
-import { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/tauri";
-import { Link, ScrollRestoration, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { ArrowBackIcon } from "@chakra-ui/icons";
 import ConfirmQuitModal from "../components/utils/ConfirmQuitModal";
 import * as _ from "lodash-es";
-import { romajiToKana } from "../lib/kanaHelper";
 import {
   ReviewItem,
   ReviewItemType,
@@ -26,11 +15,8 @@ import {
   groupUpdatedLevel,
   isGroupCorrect,
 } from "../lib/srs";
-import classNames from "classnames";
 import InputBox from "../components/srsReview/InputBox";
 import SelectOnClick from "../components/utils/SelectOnClick";
-
-const batchSize = 10;
 
 export function Component() {
   // null = has not started, (.length == 0) = finished
@@ -124,7 +110,7 @@ export function Component() {
         delay: newLevel.delay,
       };
 
-      const result = await invoke("update_srs_item", params);
+      await invoke("update_srs_item", params);
     }
 
     // If it's wrong this time

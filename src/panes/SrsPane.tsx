@@ -20,11 +20,11 @@ export interface SrsStats {
 }
 
 export function Component() {
-  const {
-    data: srsStats,
-    error,
-    isLoading,
-  } = useSWR(["get_srs_stats"], ([command]) => invoke<SrsStats>(command));
+  const { data: srsStats, error } = useSWR(["get_srs_stats"], ([command]) =>
+    invoke<SrsStats>(command),
+  );
+
+  if (error) console.error(error);
 
   if (!srsStats) return <>Loading...</>;
 

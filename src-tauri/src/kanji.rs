@@ -50,6 +50,7 @@ fn default_how_many() -> u32 {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Kanji {
+  id: u32,
   character: String,
   meanings: Vec<KanjiMeaning>,
   srs_info: Option<KanjiSrsInfo>,
@@ -270,6 +271,7 @@ pub async fn get_kanji(
         }
 
         new_vec.push(Kanji {
+          id,
           character,
           meanings: vec![meaning],
 

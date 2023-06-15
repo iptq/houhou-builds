@@ -1,6 +1,6 @@
 import { SearchIcon } from "@chakra-ui/icons";
 import { Input, InputGroup, InputRightElement, Spinner } from "@chakra-ui/react";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useState } from "react";
 
 export interface SearchBarProps {
   isLoading: boolean;

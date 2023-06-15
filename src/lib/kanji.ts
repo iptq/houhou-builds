@@ -1,4 +1,5 @@
 export interface Kanji {
+  id: number;
   character: string;
   meanings: KanjiMeaning[];
 
