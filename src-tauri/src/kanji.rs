@@ -151,8 +151,7 @@ pub async fn get_kanji(
   if let Some(character) = &opts.character {
     query = query.bind(character.clone());
   }
-  query = query.bind(opts.skip);
-  query = query.bind(opts.how_many);
+  query = query.bind(opts.skip).bind(opts.how_many);
 
   let result = query
     .fetch_all(&kanji_db.0)

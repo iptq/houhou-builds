@@ -82,6 +82,8 @@ $kanjiDisplaySize: 120px;
 
 .vocabSection {
   flex-grow: 1;
+  min-height: 0;
+
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -92,5 +94,6 @@ $kanjiDisplaySize: 120px;
 
   .vocabList {
     flex-grow: 1;
+    min-height: 0;
   }
 }

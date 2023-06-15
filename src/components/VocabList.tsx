@@ -24,13 +24,21 @@ export default function VocabList({ className, kanjiId }: VocabListProps) {
 
   return (
     <main className={classNames(styles.main, className)}>
-      <Input placeholder="Filter..." autoFocus />
+      <Input placeholder="Filter..." autoFocus className={styles.searchBar} />
 
       <div>
         Displaying {data.vocab.length} of {data.count} results. ({kanjiId})
       </div>
 
-      <div className={styles.vocabList}></div>
+      <div className={styles.vocabList}>
+        {data.vocab.map((vocab) => (
+          <div key={vocab.id} className={styles.vocabEntry}>
+            {vocab.kanji_writing}
+            <br />
+            {vocab.kana_writing}
+          </div>
+        ))}
+      </div>
     </main>
   );
 }

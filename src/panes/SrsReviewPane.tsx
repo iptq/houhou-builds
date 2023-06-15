@@ -147,7 +147,7 @@ export function Component() {
           />
         )}
 
-        <h1 className={styles["test-word"]}>{nextItem.challenge}</h1>
+        <h1 className={styles.testWord}>{nextItem.challenge}</h1>
 
         <InputBox
           submit={formSubmit}
