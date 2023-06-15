@@ -3,6 +3,11 @@ use std::{collections::HashMap, io::Read, path::PathBuf};
 use base64::{engine::general_purpose, Engine as _};
 use flate2::{read::GzDecoder, Decompress, FlushDecompress};
 use sqlx::{sqlite::SqliteRow, Encode, Row, SqlitePool, Type};
+use tantivy::{
+  query::QueryParser,
+  schema::{Schema, STRING, TEXT},
+  tokenizer::TokenizerManager,
+};
 use tauri::State;
 
 use crate::{
@@ -15,6 +20,9 @@ pub struct KanjiDb(pub SqlitePool, pub PathBuf);
 #[derive(Debug, Derivative, Serialize, Deserialize)]
 #[derivative(Default)]
 pub struct GetKanjiOptions {
+  #[serde(default)]
+  search_query: Option<String>,
+
   #[serde(default)]
   character: Option<String>,
 
@@ -84,6 +92,25 @@ pub async fn get_kanji(
   options: Option<GetKanjiOptions>,
 ) -> Result<GetKanjiResult, String> {
   let opts = options.unwrap_or_default();
+
+  if let Some(search_query) = opts.search_query {
+    println!("query: {search_query:?}");
+
+    let mut schema = Schema::builder();
+    let meanings_field = schema.add_text_field("meaning", TEXT);
+    let readings_field = schema.add_text_field("reading", TEXT);
+    let tm = TokenizerManager::default();
+    let query_parser = QueryParser::new(
+      schema.build(),
+      vec![meanings_field, readings_field],
+      tm,
+    );
+
+    let result = query_parser
+      .parse_query(&search_query)
+      .map_err(|err| err.to_string())?;
+    println!("query: {result:?}");
+  }
 
   let looking_for_character_clause = match opts.character {
     None => String::new(),

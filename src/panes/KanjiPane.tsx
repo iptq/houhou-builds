@@ -8,6 +8,7 @@ import KanjiDisplay from "../components/KanjiDisplay";
 import { Kanji } from "../lib/kanji";
 import { KanjiList } from "../components/KanjiList";
 import { useEffect, useState } from "react";
+import SearchBar from "../components/SearchBar";
 
 export interface GetKanjiResult {
   count: number;
@@ -16,8 +17,18 @@ export interface GetKanjiResult {
 
 export function Component() {
   const { selectedKanji } = useParams();
-  const { data: baseData, error } = useSWR("get_kanji", () =>
-    invoke<GetKanjiResult>("get_kanji", { options: { include_srs_info: true } }),
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const cleanedSearchQuery = searchQuery.trim().length == 0 ? undefined : searchQuery.trim();
+
+  const {
+    data: baseData,
+    isLoading,
+    error,
+  } = useSWR(["get_kanji", cleanedSearchQuery], () =>
+    invoke<GetKanjiResult>("get_kanji", {
+      options: { search_query: cleanedSearchQuery, include_srs_info: true },
+    }),
   );
 
   const [totalCount, setTotalCount] = useState(0);
@@ -45,6 +56,10 @@ export function Component() {
   return (
     <Flex className={styles["kanji-pane-container"]}>
       <Box className={styles["kanji-pane-list"]}>
+        <div className={styles["search-container"]}>
+          <SearchBar isLoading={isLoading} setSearchQuery={setSearchQuery} />
+        </div>
+
         {kanjiList && (
           <KanjiList
             kanjiList={kanjiList}

@@ -25,6 +25,7 @@ tokio = { version = "1.28.2", features = ["full"] }
 derivative = "2.2.0"
 flate2 = "1.0.26"
 base64 = "0.21.2"
+tantivy = { version = "0.20.2", default-features = false, features = ["memmap2"] }
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem

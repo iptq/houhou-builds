@@ -9,6 +9,7 @@ extern crate serde;
 pub mod kanji;
 pub mod srs;
 pub mod utils;
+pub mod vocab;
 
 use std::process;
 use std::str::FromStr;

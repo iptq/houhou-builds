@@ -76,10 +76,6 @@ export function KanjiList({
 
   return (
     <>
-      <div className={styles["search-container"]}>
-        <SearchBar />
-      </div>
-
       <small className={styles["result-count"]}>
         Displaying {kanjiList.length} of {totalCount} results.
       </small>
