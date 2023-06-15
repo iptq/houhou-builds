@@ -88,6 +88,16 @@ async fn main() -> Result<()> {
       _ => {}
     })
     .on_system_tray_event(|app, event| match event {
+      SystemTrayEvent::LeftClick {
+        tray_id,
+        position,
+        size,
+        ..
+      } => {
+        if let Some(main_window) = app.get_window("main") {
+          main_window.show();
+        }
+      }
       SystemTrayEvent::MenuItemClick { id, .. } => match id.as_str() {
         "quit" => {
           process::exit(0);

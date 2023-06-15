@@ -8,11 +8,16 @@
   },
   "package": {
     "productName": "houhou",
-    "version": "0.1.0"
+    "version": "0.1.0-rc2"
   },
   "tauri": {
     "allowlist": {
       "all": false,
+      "app": {
+        "all": true,
+        "hide": true,
+        "show": true
+      },
       "shell": {
         "all": false,
         "open": true

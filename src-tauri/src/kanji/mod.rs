@@ -1,3 +1,5 @@
+pub mod query;
+
 use std::{collections::HashMap, io::Read, path::PathBuf};
 
 use base64::{engine::general_purpose, Engine as _};
