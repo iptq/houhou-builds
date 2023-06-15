@@ -5,6 +5,12 @@ import { createBrowserRouter } from "react-router-dom";
 import { Outlet, Route, createRoutesFromElements, matchPath, useLocation } from "react-router";
 import { StrictMode } from "react";
 
+import { Component as KanjiPane } from "./panes/KanjiPane";
+import { Component as SettingsPane } from "./panes/SettingsPane";
+import { Component as SrsPane } from "./panes/SrsPane";
+import { Component as SrsReviewPane } from "./panes/SrsReviewPane";
+import { Component as VocabPane } from "./panes/VocabPane";
+
 import styles from "./App.module.scss";
 
 function Layout() {
@@ -49,7 +55,8 @@ export default function App() {
                   key={`route-${route.key}-${subRoute.key}`}
                   index={idx + idx2 == 0}
                   path={subRoute.path}
-                  lazy={() => import(`./panes/${subRoute.element ?? route.element}.tsx`)}
+                  element={subRoute.element ?? route.element}
+                  // lazy={() => import(`./panes/${subRoute.element ?? route.element}.tsx`)}
                 />
               );
             });
@@ -59,7 +66,8 @@ export default function App() {
                 key={`route-${route.key}`}
                 index={idx == 0}
                 path={route.path}
-                lazy={() => import(`./panes/${route.element}.tsx`)}
+                element={route.element}
+                // lazy={() => import(`./panes/${route.element}.tsx`)}
               />
             );
           }
@@ -84,34 +92,55 @@ type NavLinkPath =
     }
   | {
       path?: undefined;
-      subPaths: { key: string; path: string; element?: string }[];
+      subPaths: { key: string; path: string; elementName?: string; element?: JSX.Element }[];
     };
 type NavLink = {
   key: string;
   title: string;
-  element: string;
+  elementName: string;
+  element: JSX.Element;
 } & NavLinkPath;
 
 const navLinks: NavLink[] = [
-  // { key: "home", path: "/", title: "Home", element: <HomePane /> },
   {
     key: "srs",
     title: "SRS",
-    element: "SrsPane",
+    elementName: "SrsPane",
+    element: <SrsPane />,
+
     subPaths: [
       { key: "index", path: "/" },
-      { key: "review", path: "/srs/review", element: "SrsReviewPane" },
+      {
+        key: "review",
+        path: "/srs/review",
+        elementName: "SrsReviewPane",
+        element: <SrsReviewPane />,
+      },
     ],
   },
   {
     key: "kanji",
     title: "Kanji",
-    element: "KanjiPane",
+    elementName: "KanjiPane",
+    element: <KanjiPane />,
+
     subPaths: [
       { key: "index", path: "/kanji" },
       { key: "selected", path: "/kanji/:selectedKanji" },
     ],
   },
-  { key: "vocab", path: "/vocab", title: "Vocab", element: "VocabPane" },
-  { key: "settings", path: "/settings", title: "Settings", element: "SettingsPane" },
+  {
+    key: "vocab",
+    path: "/vocab",
+    title: "Vocab",
+    elementName: "VocabPane",
+    element: <VocabPane />,
+  },
+  {
+    key: "settings",
+    path: "/settings",
+    title: "Settings",
+    elementName: "SettingsPane",
+    element: <SettingsPane />,
+  },
 ];
