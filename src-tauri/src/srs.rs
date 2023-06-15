@@ -204,15 +204,18 @@ pub async fn generate_review_batch(
 ) -> Result<Vec<SrsEntry>, String> {
   let opts = options.unwrap_or_default();
 
+  let utc_now = Ticks::now().map_err(|err| err.to_string())?;
   let result = sqlx::query(
     r#"
     SELECT * FROM SrsEntrySet
       WHERE AssociatedKanji IS NOT NULL
         AND CurrentGrade < 8
+        AND NextAnswerDate <= ?
       ORDER BY RANDOM()
       LIMIT ?
   "#,
   )
+  .bind(utc_now)
   .bind(opts.batch_size)
   .fetch_all(&srs_db.0)
   .await
@@ -256,6 +259,8 @@ pub async fn update_srs_item(
   };
 
   // Kanji.Interface/ViewModels/Partial/Srs/SrsReviewViewModel.cs:600
+  let utc_now = Ticks::now().map_err(|err| err.to_string())?;
+  let new_answer_date = utc_now + Duration::from_secs(delay as u64);
 
   sqlx::query(
     r#"
@@ -263,14 +268,14 @@ pub async fn update_srs_item(
     SET
       SuccessCount = SuccessCount + ?,
       FailureCount = FailureCount + ?,
-      NextAnswerDate = NextAnswerDate + ?,
+      NextAnswerDate = ?,
       CurrentGrade = ?
     WHERE ID = ?
    "#,
   )
   .bind(success)
   .bind(failure)
-  .bind(delay * TICK_MULTIPLIER)
+  .bind(new_answer_date)
   .bind(new_grade)
   .bind(item_id)
   .execute(&srs_db.0)

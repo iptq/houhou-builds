@@ -39,7 +39,7 @@ export default function DashboardItemStats({ srsStats }: DashboardItemStatsProps
                 <div className={styles.level} key={level.name}>
                   <h3>{level.name}</h3>
 
-                  {grades.get(level.value)}
+                  {grades.get(level.value) ?? 0}
                 </div>
               ))}
             </div>

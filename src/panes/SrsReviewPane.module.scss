@@ -17,6 +17,24 @@
   padding: 64px 0;
 }
 
-.incorrect {
-  background-color: rgb(255, 202, 202) !important;
+.needHelp {
+  margin-top: 16px;
+
+  summary {
+    cursor: pointer;
+  }
+}
+
+.possibleAnswers {
+  padding-left: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-start;
+}
+
+.possibleAnswer {
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  font-size: 1.1em;
+  padding: 4px 8px;
 }

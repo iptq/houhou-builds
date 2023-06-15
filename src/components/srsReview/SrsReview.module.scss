@@ -1,0 +1,7 @@
+:not(.activatedQuestion) > .question {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.incorrect {
+  background-color: rgb(255, 202, 202) !important;
+}

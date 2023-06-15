@@ -38,9 +38,17 @@ export default function SrsPart({ srsInfo, addSrsItem }: SrsPartProps) {
 
   const nextAnswerDate = new Date(srsInfo.next_answer_date);
   const formatter: Formatter = (value, unit, suffix, epochMilliseconds, nextFormatter) => {
-    if (epochMilliseconds < Date.now()) return "now";
-    return buildFormatter(shortEnStrings)(value, unit, suffix, epochMilliseconds);
+    if (epochMilliseconds < Date.now()) return <>now</>;
+    return buildFormatter(shortEnStrings)(
+      value,
+      unit,
+      suffix,
+      epochMilliseconds,
+      nextFormatter,
+      () => Date.now(),
+    );
   };
+
   return (
     <div className={classNames(styles.box)}>
       <span className={styles.big}>

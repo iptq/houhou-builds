@@ -27,6 +27,8 @@ import {
   isGroupCorrect,
 } from "../lib/srs";
 import classNames from "classnames";
+import InputBox from "../components/srsReview/InputBox";
+import SelectOnClick from "../components/utils/SelectOnClick";
 
 const batchSize = 10;
 
@@ -90,7 +92,10 @@ export function Component() {
   if (!reviewQueue) return <Spinner />;
 
   // Done! Go back to the home page
-  if (reviewQueue.length == 0) return navigate("/");
+  if (reviewQueue.length == 0) {
+    navigate("/");
+    return <></>;
+  }
 
   const [nextItem, ...restOfQueue] = reviewQueue;
   const possibleAnswers = new Set(nextItem.possibleAnswers);
@@ -143,41 +148,7 @@ export function Component() {
     }
   };
 
-  const inputBox = (kanaInput: boolean) => {
-    const onChange = (evt: ChangeEvent<HTMLInputElement>) => {
-      let newValue = evt.target.value;
-      if (kanaInput) newValue = romajiToKana(newValue) ?? newValue;
-
-      setCurrentAnswer(newValue);
-    };
-
-    const className = classNames(styles["input-box"], incorrectTimes > 0 && styles["incorrect"]);
-    const placeholder =
-      {
-        0: "Enter your answer...",
-        1: "Wrong! Try again...",
-      }[incorrectTimes] || `Answer is: ${nextItem.possibleAnswers.join(", ")}`;
-
-    return (
-      <InputGroup>
-        <InputLeftElement>{kanaInput ? "あ" : "A"}</InputLeftElement>
-
-        <Input
-          value={currentAnswer}
-          onChange={onChange}
-          autoFocus
-          className={className}
-          placeholder={placeholder}
-          spellCheck={false}
-          backgroundColor={"white"}
-        />
-      </InputGroup>
-    );
-  };
-
   const renderInside = () => {
-    const kanaInput = nextItem.type == ReviewItemType.READING;
-
     return (
       <>
         {startingSize && (
@@ -192,16 +163,26 @@ export function Component() {
 
         <h1 className={styles["test-word"]}>{nextItem.challenge}</h1>
 
-        <form onSubmit={formSubmit}>
-          {
-            {
-              [ReviewItemType.MEANING]: "What is the meaning?",
-              [ReviewItemType.READING]: "What is the reading?",
-            }[nextItem.type]
-          }
+        <InputBox
+          submit={formSubmit}
+          type={nextItem.type}
+          answer={currentAnswer}
+          setAnswer={setCurrentAnswer}
+          incorrectTimes={incorrectTimes}
+        />
 
-          {inputBox(kanaInput)}
-        </form>
+        {incorrectTimes > 0 && (
+          <details className={styles.needHelp}>
+            <summary>Need help?</summary>
+            <div className={styles.possibleAnswers}>
+              {[...possibleAnswers].map((answer) => (
+                <SelectOnClick className={styles.possibleAnswer} key={answer}>
+                  {answer}
+                </SelectOnClick>
+              ))}
+            </div>
+          </details>
+        )}
       </>
     );
   };
@@ -216,7 +197,7 @@ export function Component() {
 
   return (
     <main className={styles.main}>
-      <Container>
+      <Container maxW="3xl">
         <Button onClick={quit}>
           <ArrowBackIcon />
           Back
