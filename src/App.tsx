@@ -5,11 +5,11 @@ import { createBrowserRouter } from "react-router-dom";
 import { Outlet, Route, createRoutesFromElements, matchPath, useLocation } from "react-router";
 import { StrictMode } from "react";
 
-import { Component as KanjiPane } from "./panes/KanjiPane";
-import { Component as SettingsPane } from "./panes/SettingsPane";
-import { Component as SrsPane } from "./panes/SrsPane";
-import { Component as SrsReviewPane } from "./panes/SrsReviewPane";
-import { Component as VocabPane } from "./panes/VocabPane";
+import KanjiPane from "./panes/KanjiPane";
+import SettingsPane from "./panes/SettingsPane";
+import SrsPane from "./panes/SrsPane";
+import SrsReviewPane from "./panes/SrsReviewPane";
+import VocabPane from "./panes/VocabPane";
 
 import styles from "./App.module.scss";
 

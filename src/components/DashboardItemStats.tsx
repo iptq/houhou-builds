@@ -21,6 +21,7 @@ export default function DashboardItemStats({ srsStats }: DashboardItemStatsProps
       {srsLevels.groups.map((group) => {
         const groupLevels = srsLevelsByGroups.get(group);
         if (!groupLevels) return null;
+        groupLevels.sort((a, b) => (a.delay == null || b.delay == null ? 0 : a.delay - b.delay));
 
         const groupCount = groupLevels
           .map((level) => grades.get(level.value) ?? 0)

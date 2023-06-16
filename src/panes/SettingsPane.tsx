@@ -11,7 +11,7 @@ interface ApplicationInfo {
   srs_db_path: string;
 }
 
-export function Component() {
+export default function SettingsPane() {
   const { data: info } = useSWR("application_info", () =>
     invoke<ApplicationInfo>("application_info"),
   );
@@ -55,5 +55,3 @@ export function Component() {
     </main>
   );
 }
-
-Component.displayName = "SettingsPane";

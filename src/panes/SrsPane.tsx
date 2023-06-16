@@ -19,7 +19,7 @@ export interface SrsStats {
   num_failure: number;
 }
 
-export function Component() {
+export default function SrsPane() {
   const { data: srsStats, error } = useSWR(["get_srs_stats"], ([command]) =>
     invoke<SrsStats>(command),
   );
@@ -38,5 +38,3 @@ export function Component() {
     </main>
   );
 }
-
-Component.displayName = "SrsPane";

@@ -16,7 +16,7 @@ export interface GetKanjiResult {
   kanji: Kanji[];
 }
 
-export function Component() {
+export default function KanjiPane() {
   const { selectedKanji } = useParams();
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -85,5 +85,3 @@ export function Component() {
     </Flex>
   );
 }
-
-Component.displayName = "KanjiPane";

@@ -18,7 +18,7 @@ import {
 import InputBox from "../components/srsReview/InputBox";
 import SelectOnClick from "../components/utils/SelectOnClick";
 
-export function Component() {
+export default function SrsReviewPane() {
   // null = has not started, (.length == 0) = finished
   const [reviewQueue, setReviewQueue] = useState<ReviewItem[] | null>(null);
   const [completedQueue, setCompletedQueue] = useState<ReviewItem[]>([]);
@@ -147,7 +147,9 @@ export function Component() {
           />
         )}
 
-        <h1 className={styles.testWord}>{nextItem.challenge}</h1>
+        <h1 className={styles.testWord} data-testid="testWord">
+          {nextItem.challenge}
+        </h1>
 
         <InputBox
           submit={formSubmit}
@@ -196,5 +198,3 @@ export function Component() {
     </main>
   );
 }
-
-Component.displayName = "SrsReviewPane";

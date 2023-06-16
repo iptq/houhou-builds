@@ -1,12 +1,10 @@
 import VocabList from "../components/VocabList";
 import styles from "./VocabPane.module.scss";
 
-export function Component() {
+export default function VocabPane() {
   return (
     <main className={styles.main}>
       <VocabList />
     </main>
   );
 }
-
-Component.displayName = "VocabPane";
